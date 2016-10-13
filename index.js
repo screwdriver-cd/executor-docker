@@ -31,7 +31,7 @@ class S3mExecutor extends Executor {
         this.docker = new Docker(options.docker);
         this.launchVersion = options.launchVersion || 'stable';
         this.logVersion = options.logVersion || 'stable';
-        this.breaker = new Fusebox((func, cb) => func(cb), hoek.applyToDefaults({
+        this.breaker = new Fusebox((obj, cb) => obj.func(cb), hoek.applyToDefaults({
             breaker: {
                 timeout: 5 * 60 * 1000 // Default to 5 minute timeout
             }
@@ -45,10 +45,8 @@ class S3mExecutor extends Executor {
      * @return {Promise}          Docker container object
      */
     _createContainer(options) {
-        return new Promise((resolve, reject) => {
-            this.breaker.runCommand(cb => this.docker.createContainer(options, cb),
-                (err, container) => (err ? reject(err) : resolve(container))
-            );
+        return this.breaker.runCommand({
+            func: cb => this.docker.createContainer(options, cb)
         });
     }
 
@@ -59,10 +57,8 @@ class S3mExecutor extends Executor {
      * @return {Promise}
      */
     _startContainer(container) {
-        return new Promise((resolve, reject) => {
-            this.breaker.runCommand(cb => container.start(cb),
-                err => (err ? reject(err) : resolve())
-            );
+        return this.breaker.runCommand({
+            func: cb => container.start(cb)
         });
     }
 
@@ -73,10 +69,8 @@ class S3mExecutor extends Executor {
      * @return {Promise}
      */
     _removeContainer(container) {
-        return new Promise((resolve, reject) => {
-            this.breaker.runCommand(cb => container.remove({ v: true, force: true }, cb),
-                err => (err ? reject(err) : resolve())
-            );
+        return this.breaker.runCommand({
+            func: cb => container.remove({ v: true, force: true }, cb)
         });
     }
 
@@ -96,10 +90,8 @@ class S3mExecutor extends Executor {
             all: true
         };
 
-        return new Promise((resolve, reject) => {
-            this.breaker.runCommand(cb => this.docker.listContainers(listArgs, cb),
-                (err, containers) => (err ? reject(err) : resolve(containers))
-            );
+        return this.breaker.runCommand({
+            func: cb => this.docker.listContainers(listArgs, cb)
         });
     }
 
@@ -209,19 +201,7 @@ class S3mExecutor extends Executor {
     * @param  {Response} Object Object containing stats for the executor/breaker
     */
     stats() {
-        return {
-            requests: {
-                total: this.breaker.getTotalRequests(),
-                timeouts: this.breaker.getTimeouts(),
-                success: this.breaker.getSuccessfulRequests(),
-                failure: this.breaker.getFailedRequests(),
-                concurrent: this.breaker.getConcurrentRequests(),
-                averageTime: this.breaker.getAverageRequestTime()
-            },
-            breaker: {
-                isClosed: this.breaker.isClosed()
-            }
-        };
+        return this.breaker.stats();
     }
 }
 
