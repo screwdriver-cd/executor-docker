@@ -3,11 +3,37 @@
 
 > Docker Swarm Executor for Screwdriver
 
+This is an executor for the Screwdriver CD solution that interacts with Docker Swarm (and Docker locally).
+
 ## Usage
 
 ```bash
 npm install screwdriver-executor-s3m
 ```
+
+### Initialization
+
+The class has a variety of knobs to tweak when interacting with your Swarm instance.
+
+| Parameter        | Type  |  Description |
+| :-------------   | :---- | :-------------|
+| config        | Object | Configuration Object |
+| config.docker | Object | [Dockerode configuration][dockerode] |
+| config.fusebox | Object | [Circuit Breaker configuration][circuitbreaker] |
+| config.launchVersion | String | Launcher container version to use (stable) |
+| config.logVersion | String | Log Service container version to use (stable) |
+```js
+const executor = new S3mExecutor({
+    docker: {
+        socketPath: '/var/lib/docker.sock'
+    },
+    launchVersion: 'stable'
+});
+```
+
+### Methods
+
+For more information on `start`, `stop`, and `stats` please see the [executor-base-class].
 
 ## Testing
 
@@ -25,7 +51,10 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 [license-image]: https://img.shields.io/npm/l/screwdriver-executor-s3m.svg
 [issues-image]: https://img.shields.io/github/issues/screwdriver-cd/executor-s3m.svg
 [issues-url]: https://github.com/screwdriver-cd/executor-s3m/issues
-[status-image]: https://cd.screwdriver.cd/pipelines/pipelineid/badge
-[status-url]: https://cd.screwdriver.cd/pipelines/pipelineid
+[status-image]: https://cd.screwdriver.cd/pipelines/3d10806f51927f28b4a690c8153499a277b29397/badge
+[status-url]: https://cd.screwdriver.cd/pipelines/3d10806f51927f28b4a690c8153499a277b29397
 [daviddm-image]: https://david-dm.org/screwdriver-cd/executor-s3m.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/screwdriver-cd/executor-s3m
+[dockerode]: https://www.npmjs.com/package/dockerode#getting-started
+[circuitbreaker]: https://www.npmjs.com/package/circuit-fuses#constructor
+[executor-base-class]: https://github.com/screwdriver-cd/executor-base
