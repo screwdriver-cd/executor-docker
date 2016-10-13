@@ -136,6 +136,9 @@ class S3mExecutor extends Executor {
                         '/opt/screwdriver/logservice',
                         '--emitter',
                         '/opt/screwdriver/emitter',
+                        '--api-uri',
+                        config.apiUri,
+                        '--build',
                         config.buildId
                     ],
                     Env: [

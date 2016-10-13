@@ -125,6 +125,9 @@ describe('index', () => {
                     '/opt/screwdriver/logservice',
                     '--emitter',
                     '/opt/screwdriver/emitter',
+                    '--api-uri',
+                    apiUri,
+                    '--build',
                     buildId
                 ],
                 Env: [
