@@ -11,7 +11,10 @@ class S3mExecutor extends Executor {
      * Constructor
      * @method constructor
      * @param  {Object} options                                  Configuration options
-     * @param  {Object} options.docker                           Docker configuration
+     * @param  {Object} options.ecosystem                        Screwdriver Ecosystem
+     * @param  {Object} options.ecosystem.api                    Routable URI to Screwdriver API
+     * @param  {Object} options.ecosystem.store                  Routable URI to Screwdriver Store
+     * @param  {Object} [options.docker]                         Docker configuration
      * @param  {String} [options.docker.protocol]                Protocol to use
      * @param  {String} [options.docker.host]                    Docker Swarm host to interact with
      * @param  {String} [options.docker.port]                    Port number
@@ -23,14 +26,13 @@ class S3mExecutor extends Executor {
      * @param  {Object} [options.fusebox.breaker]                Breaker configuration
      * @param  {Number} [options.fusebox.breaker.timeout=300000] Timeout before retrying
      * @param  {String} [options.launchVersion=stable]           Launcher container version to use
-     * @param  {String} [options.logVersion=stable]              Log Service container version to use
      */
     constructor(options) {
         super();
 
+        this.ecosystem = options.ecosystem;
         this.docker = new Docker(options.docker);
         this.launchVersion = options.launchVersion || 'stable';
-        this.logVersion = options.logVersion || 'stable';
         this.breaker = new Fusebox((obj, cb) => obj.func(cb), hoek.applyToDefaults({
             breaker: {
                 timeout: 5 * 60 * 1000 // Default to 5 minute timeout
@@ -92,7 +94,7 @@ class S3mExecutor extends Executor {
 
         return this.breaker.runCommand({
             func: cb => this.docker.listContainers(listArgs, cb)
-        });
+        }).then(containers => containers.map(container => this.docker.getContainer(container.Id)));
     }
 
     /**
@@ -101,7 +103,6 @@ class S3mExecutor extends Executor {
      * @param  {Object}   config            A configuration object
      * @param  {String}   config.buildId    ID for the build
      * @param  {String}   config.container  Container for the build to run in
-     * @param  {String}   config.apiUri     API Uri
      * @param  {String}   config.token      JWT for the Build
      * @return {Promise}
      */
@@ -115,71 +116,54 @@ class S3mExecutor extends Executor {
                     sdbuild: config.buildId
                 }
             })
-            .then(launchContainer => Promise.all([
-                this._createContainer({
-                    name: `${config.buildId}-log`,
-                    Image: `screwdrivercd/log-service:${this.logVersion}`,
-                    Entrypoint: '/opt/screwdriver/tini',
-                    Labels: {
-                        sdbuild: config.buildId
-                    },
-                    Cmd: [
-                        '--',
+            .then(launchContainer => this._createContainer({
+                name: `${config.buildId}-build`,
+                Image: config.container,
+                Entrypoint: '/opt/screwdriver/tini',
+                Labels: {
+                    sdbuild: config.buildId
+                },
+                Cmd: [
+                    '--',
+                    // Run a shell command
+                    '/bin/sh',
+                    '-c',
+                    [
+                        // Run the launcher in the background
+                        '/opt/screwdriver/launch',
+                        '--api-uri',
+                        this.ecosystem.api,
+                        '--emitter',
+                        '/opt/screwdriver/emitter',
+                        config.buildId,
+                        '&',
+                        // Run the logservice in the background
                         '/opt/screwdriver/logservice',
                         '--emitter',
                         '/opt/screwdriver/emitter',
                         '--api-uri',
-                        config.apiUri,
+                        this.ecosystem.store,
                         '--build',
-                        config.buildId
-                    ],
-                    Env: [
-                        `SD_TOKEN=${config.token}`
-                    ],
-                    HostConfig: {
-                        // 200 MB of memory
-                        Memory: 200 * 1024 * 1024,
-                        // 300 MB of memory + swap (aka, 100 MB of swap)
-                        MemoryLimit: 300 * 1024 * 1024,
-                        VolumesFrom: [
-                            `${launchContainer.id}:rw`
-                        ]
-                    }
-                }),
-                this._createContainer({
-                    name: `${config.buildId}-build`,
-                    Image: config.container,
-                    Entrypoint: '/opt/screwdriver/tini',
-                    Labels: {
-                        sdbuild: config.buildId
-                    },
-                    Cmd: [
-                        '--',
-                        '/opt/screwdriver/launch',
-                        '--api-uri',
-                        config.apiUri,
-                        '--emitter',
-                        '/opt/screwdriver/emitter',
-                        config.buildId
-                    ],
-                    Env: [
-                        `SD_TOKEN=${config.token}`
-                    ],
-                    HostConfig: {
-                        // 2 GB of memory
-                        Memory: 2 * 1024 * 1024 * 1024,
-                        // 3 GB of memory + swap (aka, 1 GB of swap)
-                        MemoryLimit: 3 * 1024 * 1024 * 1024,
-                        VolumesFrom: [
-                            `${launchContainer.id}:rw`
-                        ]
-                    }
-                })
-            ]))
-            .then(([logContainer, buildContainer]) => Promise.all([
-                this._startContainer(logContainer),
-                this._startContainer(buildContainer)
-            ]));
+                        config.buildId,
+                        '&',
+                        // Wait for both background jobs to complete
+                        'wait $(jobs -p)'
+                    ].join(' ')
+                ],
+                Env: [
+                    `SD_TOKEN=${config.token}`
+                ],
+                HostConfig: {
+                    // 2 GB of memory
+                    Memory: 2 * 1024 * 1024 * 1024,
+                    // 3 GB of memory + swap (aka, 1 GB of swap)
+                    MemoryLimit: 3 * 1024 * 1024 * 1024,
+                    VolumesFrom: [
+                        `${launchContainer.id}:rw`
+                    ]
+                }
+            }))
+            .then(buildContainer => this._startContainer(buildContainer));
     }
 
     /**
