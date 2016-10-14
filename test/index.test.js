@@ -13,6 +13,7 @@ describe('index', () => {
     let dockerodeMock;
     let dockerMock;
     let containerMock;
+    let containerShellMock;
     let executor;
 
     before(() => {
@@ -28,9 +29,13 @@ describe('index', () => {
             start: sinon.stub().yieldsAsync(),
             remove: sinon.stub().yieldsAsync()
         };
+        containerShellMock = {
+            id: 'containerID'
+        };
         dockerMock = {
             createContainer: sinon.stub().yieldsAsync(null, containerMock),
-            listContainers: sinon.stub().yieldsAsync(null, [containerMock])
+            listContainers: sinon.stub().yieldsAsync(null, [containerShellMock]),
+            getContainer: sinon.stub().returns(containerMock)
         };
         dockerodeMock = sinon.stub().returns(dockerMock);
 
@@ -41,6 +46,11 @@ describe('index', () => {
         /* eslint-enable global-require */
 
         executor = new Executor({
+            ecosystem: {
+                api: 'api',
+                ui: 'ui',
+                store: 'store'
+            },
             docker: {
                 host: 'docker-swarm'
             },
@@ -74,7 +84,6 @@ describe('index', () => {
 
         it('defaults to stable containers', () => {
             assert.equal(executor.launchVersion, 'stable');
-            assert.equal(executor.logVersion, 'stable');
         });
 
         it('supports customizing containers', () => {
@@ -84,7 +93,6 @@ describe('index', () => {
             });
 
             assert.equal(executor.launchVersion, 'v1.2.3');
-            assert.equal(executor.logVersion, 'v2.3.4');
         });
     });
 
@@ -108,39 +116,6 @@ describe('index', () => {
                     sdbuild: buildId
                 }
             };
-            const logContainer = {
-                id: 'logID',
-                start: sinon.stub().yieldsAsync(null),
-                remove: sinon.stub().yieldsAsync(new Error())
-            };
-            const logArgs = {
-                name: `${buildId}-log`,
-                Image: 'screwdrivercd/log-service:stable',
-                Entrypoint: '/opt/screwdriver/tini',
-                Labels: {
-                    sdbuild: buildId
-                },
-                Cmd: [
-                    '--',
-                    '/opt/screwdriver/logservice',
-                    '--emitter',
-                    '/opt/screwdriver/emitter',
-                    '--api-uri',
-                    apiUri,
-                    '--build',
-                    buildId
-                ],
-                Env: [
-                    `SD_TOKEN=${token}`
-                ],
-                HostConfig: {
-                    Memory: 200 * 1024 * 1024,
-                    MemoryLimit: 300 * 1024 * 1024,
-                    VolumesFrom: [
-                        'launcherID:rw'
-                    ]
-                }
-            };
             const buildContainer = {
                 id: 'buildID',
                 start: sinon.stub().yieldsAsync(null),
@@ -155,12 +130,25 @@ describe('index', () => {
                 },
                 Cmd: [
                     '--',
-                    '/opt/screwdriver/launch',
-                    '--api-uri',
-                    apiUri,
-                    '--emitter',
-                    '/opt/screwdriver/emitter',
-                    buildId
+                    '/bin/sh',
+                    '-c', [
+                        '/opt/screwdriver/launch',
+                        '--api-uri',
+                        'api',
+                        '--emitter',
+                        '/opt/screwdriver/emitter',
+                        buildId,
+                        '&',
+                        '/opt/screwdriver/logservice',
+                        '--emitter',
+                        '/opt/screwdriver/emitter',
+                        '--api-uri',
+                        'store',
+                        '--build',
+                        buildId,
+                        '&',
+                        'wait $(jobs -p)'
+                    ].join(' ')
                 ],
                 Env: [
                     `SD_TOKEN=${token}`
@@ -177,8 +165,6 @@ describe('index', () => {
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
             dockerMock.createContainer.withArgs(launcherArgs)
                 .yieldsAsync(null, launcherContainer);
-            dockerMock.createContainer.withArgs(logArgs)
-                .yieldsAsync(null, logContainer);
             dockerMock.createContainer.withArgs(buildArgs)
                 .yieldsAsync(null, buildContainer);
 
@@ -186,11 +172,9 @@ describe('index', () => {
                 buildId, container, apiUri, token
             }).then(() => {
                 assert.calledWith(dockerMock.createContainer, buildArgs);
-                assert.calledWith(dockerMock.createContainer, logArgs);
                 assert.calledWith(dockerMock.createContainer, launcherArgs);
-                assert.callCount(dockerMock.createContainer, 3);
+                assert.callCount(dockerMock.createContainer, 2);
                 assert.callCount(buildContainer.start, 1);
-                assert.callCount(logContainer.start, 1);
             });
         });
 
@@ -234,7 +218,7 @@ describe('index', () => {
 
             dockerMock.listContainers.yieldsAsync(new Error('bad container args'));
             dockerMock.listContainers.withArgs(findArgs)
-                .yieldsAsync(null, [containerMock, containerMock]);
+                .yieldsAsync(null, [containerShellMock, containerShellMock]);
 
             return executor.stop({
                 buildId

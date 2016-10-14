@@ -19,9 +19,9 @@ The class has a variety of knobs to tweak when interacting with your Swarm insta
 | :-------------   | :---- | :-------------|
 | config        | Object | Configuration Object |
 | config.docker | Object | [Dockerode configuration][dockerode] |
+| config.ecosystem | Object | Screwdriver Ecosystem (ui, api, store, etc.) |
 | config.fusebox | Object | [Circuit Breaker configuration][circuitbreaker] |
 | config.launchVersion | String | Launcher container version to use (stable) |
-| config.logVersion | String | Log Service container version to use (stable) |
 ```js
 const executor = new S3mExecutor({
     docker: {
