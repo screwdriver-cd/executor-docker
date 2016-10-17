@@ -53,6 +53,18 @@ class S3mExecutor extends Executor {
     }
 
     /**
+     * Create a Docker image
+     * @method _createImage
+     * @param  {Object}   options Docker image options
+     * @return {Promise}          Docker image object
+     */
+    _createImage(options) {
+        return this.breaker.runCommand({
+            func: cb => this.docker.createImage(options, cb)
+        });
+    }
+
+    /**
      * Start a Docker container
      * @method _startContainer
      * @param  {Container}   container Docker container to start
@@ -107,15 +119,27 @@ class S3mExecutor extends Executor {
      * @return {Promise}
      */
     _start(config) {
-        return this._createContainer(
-            {
+        const [buildImage, buildTag] = config.container.split(':');
+
+        return Promise.all(
+            [
+                this._createImage({
+                    fromImage: 'screwdrivercd/launcher',
+                    tag: this.launchVersion
+                }),
+                this._createImage({
+                    fromImage: buildImage,
+                    tag: buildTag || 'latest'
+                })
+            ])
+            .then(() => this._createContainer({
                 name: `${config.buildId}-init`,
                 Image: `screwdrivercd/launcher:${this.launchVersion}`,
                 Entrypoint: '/bin/true',
                 Labels: {
                     sdbuild: config.buildId
                 }
-            })
+            }))
             .then(launchContainer => this._createContainer({
                 name: `${config.buildId}-build`,
                 Image: config.container,
