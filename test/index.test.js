@@ -34,6 +34,7 @@ describe('index', () => {
         };
         dockerMock = {
             createContainer: sinon.stub().yieldsAsync(null, containerMock),
+            createImage: sinon.stub().yieldsAsync(null),
             listContainers: sinon.stub().yieldsAsync(null, [containerShellMock]),
             getContainer: sinon.stub().returns(containerMock)
         };
@@ -98,9 +99,9 @@ describe('index', () => {
 
     describe('start', () => {
         const buildId = '250e77f12a5ab6972a0895d290c4792f0a326ea8';
-        const container = 'node:6';
         const apiUri = 'https://api.sd.cd';
         const token = '123456';
+        let container = 'node:6';
 
         it('creates the required containers and starts them', () => {
             const launcherContainer = {
@@ -115,6 +116,10 @@ describe('index', () => {
                 Labels: {
                     sdbuild: buildId
                 }
+            };
+            const launcherImageArgs = {
+                fromImage: 'screwdrivercd/launcher',
+                tag: 'stable'
             };
             const buildContainer = {
                 id: 'buildID',
@@ -161,6 +166,10 @@ describe('index', () => {
                     ]
                 }
             };
+            const buildImageArgs = {
+                fromImage: 'node',
+                tag: '6'
+            };
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
             dockerMock.createContainer.withArgs(launcherArgs)
@@ -171,6 +180,98 @@ describe('index', () => {
             return executor.start({
                 buildId, container, apiUri, token
             }).then(() => {
+                assert.calledWith(dockerMock.createImage, buildImageArgs);
+                assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                assert.callCount(dockerMock.createImage, 2);
+                assert.calledWith(dockerMock.createContainer, buildArgs);
+                assert.calledWith(dockerMock.createContainer, launcherArgs);
+                assert.callCount(dockerMock.createContainer, 2);
+                assert.callCount(buildContainer.start, 1);
+            });
+        });
+
+        it('creates containers without specifying a tag', () => {
+            container = 'node';
+
+            const launcherContainer = {
+                id: 'launcherID',
+                start: sinon.stub().yieldsAsync(new Error()),
+                remove: sinon.stub().yieldsAsync(new Error())
+            };
+            const launcherArgs = {
+                name: `${buildId}-init`,
+                Image: 'screwdrivercd/launcher:stable',
+                Entrypoint: '/bin/true',
+                Labels: {
+                    sdbuild: buildId
+                }
+            };
+            const launcherImageArgs = {
+                fromImage: 'screwdrivercd/launcher',
+                tag: 'stable'
+            };
+            const buildContainer = {
+                id: 'buildID',
+                start: sinon.stub().yieldsAsync(null),
+                remove: sinon.stub().yieldsAsync(new Error())
+            };
+            const buildArgs = {
+                name: `${buildId}-build`,
+                Image: container,
+                Entrypoint: '/opt/screwdriver/tini',
+                Labels: {
+                    sdbuild: buildId
+                },
+                Cmd: [
+                    '--',
+                    '/bin/sh',
+                    '-c', [
+                        '/opt/screwdriver/launch',
+                        '--api-uri',
+                        'api',
+                        '--emitter',
+                        '/opt/screwdriver/emitter',
+                        buildId,
+                        '&',
+                        '/opt/screwdriver/logservice',
+                        '--emitter',
+                        '/opt/screwdriver/emitter',
+                        '--api-uri',
+                        'store',
+                        '--build',
+                        buildId,
+                        '&',
+                        'wait $(jobs -p)'
+                    ].join(' ')
+                ],
+                Env: [
+                    `SD_TOKEN=${token}`
+                ],
+                HostConfig: {
+                    Memory: 2 * 1024 * 1024 * 1024,
+                    MemoryLimit: 3 * 1024 * 1024 * 1024,
+                    VolumesFrom: [
+                        'launcherID:rw'
+                    ]
+                }
+            };
+            const buildImageArgs = {
+                fromImage: 'node',
+                tag: 'latest'
+            };
+
+            dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
+            dockerMock.createContainer.withArgs(launcherArgs)
+                .yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs)
+                .yieldsAsync(null, buildContainer);
+
+            return executor.start({
+                buildId, container, apiUri, token
+            }).then(() => {
+                assert.calledWith(dockerMock.createImage, buildImageArgs);
+                assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                assert.callCount(dockerMock.createImage, 2);
                 assert.calledWith(dockerMock.createContainer, buildArgs);
                 assert.calledWith(dockerMock.createContainer, launcherArgs);
                 assert.callCount(dockerMock.createContainer, 2);
