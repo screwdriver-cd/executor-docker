@@ -6,7 +6,7 @@ const hoek = require('hoek');
 const Fusebox = require('circuit-fuses');
 const Docker = require('dockerode');
 
-class S3mExecutor extends Executor {
+class DockerExecutor extends Executor {
     /**
      * Constructor
      * @method constructor
@@ -110,7 +110,7 @@ class S3mExecutor extends Executor {
     }
 
     /**
-     * Starts a s3m build
+     * Starts a docker build
      * @method _start
      * @param  {Object}   config            A configuration object
      * @param  {String}   config.buildId    ID for the build
@@ -191,7 +191,7 @@ class S3mExecutor extends Executor {
     }
 
     /**
-     * Stop a s3m build
+     * Stop a docker build
      * @method _stop
      * @param  {Object}   config            A configuration object
      * @param  {String}   config.buildId    ID for the build
@@ -213,4 +213,4 @@ class S3mExecutor extends Executor {
     }
 }
 
-module.exports = S3mExecutor;
+module.exports = DockerExecutor;
