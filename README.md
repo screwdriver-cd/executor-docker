@@ -51,8 +51,8 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 [license-image]: https://img.shields.io/npm/l/screwdriver-executor-docker.svg
 [issues-image]: https://img.shields.io/github/issues/screwdriver-cd/executor-docker.svg
 [issues-url]: https://github.com/screwdriver-cd/executor-docker/issues
-[status-image]: https://cd.screwdriver.cd/pipelines/170dc79dd34afdf1caf23157dcb650d96d49b567/badge
-[status-url]: https://cd.screwdriver.cd/pipelines/170dc79dd34afdf1caf23157dcb650d96d49b567
+[status-image]: https://cd.screwdriver.cd/pipelines/919b0a59ce9d411223b8ff12f9f21d7ebe982efe/badge
+[status-url]: https://cd.screwdriver.cd/pipelines/919b0a59ce9d411223b8ff12f9f21d7ebe982efe
 [daviddm-image]: https://david-dm.org/screwdriver-cd/executor-docker.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/screwdriver-cd/executor-docker
 [dockerode]: https://www.npmjs.com/package/dockerode#getting-started
