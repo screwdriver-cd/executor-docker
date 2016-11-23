@@ -143,7 +143,7 @@ class DockerExecutor extends Executor {
             .then(launchContainer => this._createContainer({
                 name: `${config.buildId}-build`,
                 Image: config.container,
-                Entrypoint: '/opt/screwdriver/tini',
+                Entrypoint: '/opt/sd/tini',
                 Labels: {
                     sdbuild: config.buildId
                 },
@@ -154,17 +154,17 @@ class DockerExecutor extends Executor {
                     '-c',
                     [
                         // Run the launcher in the background
-                        '/opt/screwdriver/launch',
+                        '/opt/sd/launch',
                         '--api-uri',
                         this.ecosystem.api,
                         '--emitter',
-                        '/opt/screwdriver/emitter',
+                        '/opt/sd/emitter',
                         config.buildId,
                         '&',
                         // Run the logservice in the background
-                        '/opt/screwdriver/logservice',
+                        '/opt/sd/logservice',
                         '--emitter',
-                        '/opt/screwdriver/emitter',
+                        '/opt/sd/emitter',
                         '--api-uri',
                         this.ecosystem.store,
                         '--build',

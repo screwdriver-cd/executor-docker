@@ -129,7 +129,7 @@ describe('index', () => {
             const buildArgs = {
                 name: `${buildId}-build`,
                 Image: container,
-                Entrypoint: '/opt/screwdriver/tini',
+                Entrypoint: '/opt/sd/tini',
                 Labels: {
                     sdbuild: buildId
                 },
@@ -137,16 +137,16 @@ describe('index', () => {
                     '--',
                     '/bin/sh',
                     '-c', [
-                        '/opt/screwdriver/launch',
+                        '/opt/sd/launch',
                         '--api-uri',
                         'api',
                         '--emitter',
-                        '/opt/screwdriver/emitter',
+                        '/opt/sd/emitter',
                         buildId,
                         '&',
-                        '/opt/screwdriver/logservice',
+                        '/opt/sd/logservice',
                         '--emitter',
-                        '/opt/screwdriver/emitter',
+                        '/opt/sd/emitter',
                         '--api-uri',
                         'store',
                         '--build',
@@ -218,7 +218,7 @@ describe('index', () => {
             const buildArgs = {
                 name: `${buildId}-build`,
                 Image: container,
-                Entrypoint: '/opt/screwdriver/tini',
+                Entrypoint: '/opt/sd/tini',
                 Labels: {
                     sdbuild: buildId
                 },
@@ -226,16 +226,16 @@ describe('index', () => {
                     '--',
                     '/bin/sh',
                     '-c', [
-                        '/opt/screwdriver/launch',
+                        '/opt/sd/launch',
                         '--api-uri',
                         'api',
                         '--emitter',
-                        '/opt/screwdriver/emitter',
+                        '/opt/sd/emitter',
                         buildId,
                         '&',
-                        '/opt/screwdriver/logservice',
+                        '/opt/sd/logservice',
                         '--emitter',
-                        '/opt/screwdriver/emitter',
+                        '/opt/sd/emitter',
                         '--api-uri',
                         'store',
                         '--build',
