@@ -39,7 +39,7 @@
     "chai": "^3.5.0",
     "eslint": "^3.2.2",
     "eslint-config-screwdriver": "^2.0.0",
-    "jenkins-mocha": "^3.0.0",
+    "jenkins-mocha": "^4.0.0",
     "mockery": "^2.0.0",
     "sinon": "^1.17.6",
     "sinon-as-promised": "^4.0.2"
@@ -48,6 +48,6 @@
     "circuit-fuses": "^2.1.0",
     "dockerode": "^2.3.1",
     "hoek": "^4.1.0",
-    "screwdriver-executor-base": "^5.0.2"
+    "screwdriver-executor-base": "^5.2.0"
   }
 }

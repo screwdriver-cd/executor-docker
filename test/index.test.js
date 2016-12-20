@@ -8,7 +8,10 @@ require('sinon-as-promised');
 
 sinon.assert.expose(assert, { prefix: '' });
 
-describe('index', () => {
+describe('index', function () {
+    // Time not important. Only life important.
+    this.timeout(5000);
+
     let Executor;
     let dockerodeMock;
     let dockerMock;
@@ -98,7 +101,7 @@ describe('index', () => {
     });
 
     describe('start', () => {
-        const buildId = '250e77f12a5ab6972a0895d290c4792f0a326ea8';
+        const buildId = 1992;
         const apiUri = 'https://api.sd.cd';
         const token = '123456';
         let container = 'node:6';
@@ -305,7 +308,7 @@ describe('index', () => {
     });
 
     describe('stop', () => {
-        const buildId = '250e77f12a5ab6972a0895d290c4792f0a326ea8';
+        const buildId = 1992;
 
         it('finds and removes the containers', () => {
             const findArgs = {
