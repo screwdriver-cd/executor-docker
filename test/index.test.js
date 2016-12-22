@@ -117,7 +117,7 @@ describe('index', function () {
                 Image: 'screwdrivercd/launcher:stable',
                 Entrypoint: '/bin/true',
                 Labels: {
-                    sdbuild: buildId
+                    sdbuild: buildId.toString()
                 }
             };
             const launcherImageArgs = {
@@ -134,7 +134,7 @@ describe('index', function () {
                 Image: container,
                 Entrypoint: '/opt/sd/tini',
                 Labels: {
-                    sdbuild: buildId
+                    sdbuild: buildId.toString()
                 },
                 Cmd: [
                     '--',
@@ -206,7 +206,7 @@ describe('index', function () {
                 Image: 'screwdrivercd/launcher:stable',
                 Entrypoint: '/bin/true',
                 Labels: {
-                    sdbuild: buildId
+                    sdbuild: buildId.toString()
                 }
             };
             const launcherImageArgs = {
@@ -223,7 +223,7 @@ describe('index', function () {
                 Image: container,
                 Entrypoint: '/opt/sd/tini',
                 Labels: {
-                    sdbuild: buildId
+                    sdbuild: buildId.toString()
                 },
                 Cmd: [
                     '--',

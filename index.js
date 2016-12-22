@@ -91,7 +91,7 @@ class DockerExecutor extends Executor {
     /**
      * Find Docker containers
      * @method _findContainers
-     * @param  {String}   buildId Build ID to find
+     * @param  {Integer}  buildId Build ID to find
      * @return {Promise}          List of containers
      */
     _findContainers(buildId) {
@@ -113,7 +113,7 @@ class DockerExecutor extends Executor {
      * Starts a docker build
      * @method _start
      * @param  {Object}   config            A configuration object
-     * @param  {String}   config.buildId    ID for the build
+     * @param  {Integer}  config.buildId    ID for the build
      * @param  {String}   config.container  Container for the build to run in
      * @param  {String}   config.token      JWT for the Build
      * @return {Promise}
@@ -137,7 +137,7 @@ class DockerExecutor extends Executor {
                 Image: `screwdrivercd/launcher:${this.launchVersion}`,
                 Entrypoint: '/bin/true',
                 Labels: {
-                    sdbuild: config.buildId
+                    sdbuild: config.buildId.toString()
                 }
             }))
             .then(launchContainer => this._createContainer({
@@ -145,7 +145,7 @@ class DockerExecutor extends Executor {
                 Image: config.container,
                 Entrypoint: '/opt/sd/tini',
                 Labels: {
-                    sdbuild: config.buildId
+                    sdbuild: config.buildId.toString()
                 },
                 Cmd: [
                     '--',
@@ -194,7 +194,7 @@ class DockerExecutor extends Executor {
      * Stop a docker build
      * @method _stop
      * @param  {Object}   config            A configuration object
-     * @param  {String}   config.buildId    ID for the build
+     * @param  {Integer}  config.buildId    ID for the build
      * @return {Promise}
      */
     _stop(config) {
