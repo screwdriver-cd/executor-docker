@@ -88,15 +88,17 @@ describe('index', function () {
 
         it('defaults to stable containers', () => {
             assert.equal(executor.launchVersion, 'stable');
+            assert.equal(executor.prefix, '');
         });
 
         it('supports customizing containers', () => {
             executor = new Executor({
                 launchVersion: 'v1.2.3',
-                logVersion: 'v2.3.4'
+                prefix: 'beta_'
             });
 
             assert.equal(executor.launchVersion, 'v1.2.3');
+            assert.equal(executor.prefix, 'beta_');
         });
     });
 
@@ -179,6 +181,103 @@ describe('index', function () {
                 .yieldsAsync(null, launcherContainer);
             dockerMock.createContainer.withArgs(buildArgs)
                 .yieldsAsync(null, buildContainer);
+
+            return executor.start({
+                buildId, container, apiUri, token
+            }).then(() => {
+                assert.calledWith(dockerMock.createImage, buildImageArgs);
+                assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                assert.callCount(dockerMock.createImage, 2);
+                assert.calledWith(dockerMock.createContainer, buildArgs);
+                assert.calledWith(dockerMock.createContainer, launcherArgs);
+                assert.callCount(dockerMock.createContainer, 2);
+                assert.callCount(buildContainer.start, 1);
+            });
+        });
+
+        it('supports prefixed containers', () => {
+            const prefix = 'beta_';
+            const launcherContainer = {
+                id: 'launcherID',
+                start: sinon.stub().yieldsAsync(new Error()),
+                remove: sinon.stub().yieldsAsync(new Error())
+            };
+            const launcherArgs = {
+                name: `${prefix}${buildId}-init`,
+                Image: 'screwdrivercd/launcher:stable',
+                Entrypoint: '/bin/true',
+                Labels: {
+                    sdbuild: `${prefix}${buildId}`
+                }
+            };
+            const launcherImageArgs = {
+                fromImage: 'screwdrivercd/launcher',
+                tag: 'stable'
+            };
+            const buildContainer = {
+                id: 'buildID',
+                start: sinon.stub().yieldsAsync(null),
+                remove: sinon.stub().yieldsAsync(new Error())
+            };
+            const buildArgs = {
+                name: `${prefix}${buildId}-build`,
+                Image: container,
+                Entrypoint: '/opt/sd/tini',
+                Labels: {
+                    sdbuild: `${prefix}${buildId}`
+                },
+                Cmd: [
+                    '--',
+                    '/bin/sh',
+                    '-c', [
+                        '/opt/sd/launch',
+                        '--api-uri',
+                        'api',
+                        '--emitter',
+                        '/opt/sd/emitter',
+                        buildId,
+                        '&',
+                        '/opt/sd/logservice',
+                        '--emitter',
+                        '/opt/sd/emitter',
+                        '--api-uri',
+                        'store',
+                        '--build',
+                        buildId,
+                        '&',
+                        'wait $(jobs -p)'
+                    ].join(' ')
+                ],
+                Env: [
+                    `SD_TOKEN=${token}`
+                ],
+                HostConfig: {
+                    Memory: 2 * 1024 * 1024 * 1024,
+                    MemoryLimit: 3 * 1024 * 1024 * 1024,
+                    VolumesFrom: [
+                        'launcherID:rw'
+                    ]
+                }
+            };
+            const buildImageArgs = {
+                fromImage: 'node',
+                tag: '6'
+            };
+
+            dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
+            dockerMock.createContainer.withArgs(launcherArgs)
+                .yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs)
+                .yieldsAsync(null, buildContainer);
+
+            executor = new Executor({
+                prefix,
+                ecosystem: {
+                    api: 'api',
+                    ui: 'ui',
+                    store: 'store'
+                }
+            });
 
             return executor.start({
                 buildId, container, apiUri, token
@@ -323,6 +422,39 @@ describe('index', function () {
             dockerMock.listContainers.yieldsAsync(new Error('bad container args'));
             dockerMock.listContainers.withArgs(findArgs)
                 .yieldsAsync(null, [containerShellMock, containerShellMock]);
+
+            return executor.stop({
+                buildId
+            }).then(() => {
+                assert.calledWith(dockerMock.listContainers, findArgs);
+                assert.calledWith(containerMock.remove, removeArgs);
+                assert.callCount(containerMock.remove, 2);
+            });
+        });
+
+        it('supports prefixes', () => {
+            const prefix = 'beta_';
+            const findArgs = {
+                filters: `{"label":["sdbuild=${prefix}${buildId}"]}`,
+                all: true
+            };
+            const removeArgs = {
+                v: true,
+                force: true
+            };
+
+            dockerMock.listContainers.yieldsAsync(new Error('bad container args'));
+            dockerMock.listContainers.withArgs(findArgs)
+                .yieldsAsync(null, [containerShellMock, containerShellMock]);
+
+            executor = new Executor({
+                prefix,
+                ecosystem: {
+                    api: 'api',
+                    ui: 'ui',
+                    store: 'store'
+                }
+            });
 
             return executor.stop({
                 buildId

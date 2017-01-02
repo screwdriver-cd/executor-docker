@@ -26,6 +26,7 @@ class DockerExecutor extends Executor {
      * @param  {Object} [options.fusebox.breaker]                Breaker configuration
      * @param  {Number} [options.fusebox.breaker.timeout=300000] Timeout before retrying
      * @param  {String} [options.launchVersion=stable]           Launcher container version to use
+     * @param  {String} [options.prefix=""]                      Prefix to all container names
      */
     constructor(options) {
         super();
@@ -33,6 +34,7 @@ class DockerExecutor extends Executor {
         this.ecosystem = options.ecosystem;
         this.docker = new Docker(options.docker);
         this.launchVersion = options.launchVersion || 'stable';
+        this.prefix = options.prefix || '';
         this.breaker = new Fusebox((obj, cb) => obj.func(cb), hoek.applyToDefaults({
             breaker: {
                 timeout: 5 * 60 * 1000 // Default to 5 minute timeout
@@ -98,7 +100,7 @@ class DockerExecutor extends Executor {
         const listArgs = {
             filters: JSON.stringify({
                 label: [
-                    `sdbuild=${buildId}`
+                    `sdbuild=${this.prefix}${buildId}`
                 ]
             }),
             all: true
@@ -133,19 +135,19 @@ class DockerExecutor extends Executor {
                 })
             ])
             .then(() => this._createContainer({
-                name: `${config.buildId}-init`,
+                name: `${this.prefix}${config.buildId}-init`,
                 Image: `screwdrivercd/launcher:${this.launchVersion}`,
                 Entrypoint: '/bin/true',
                 Labels: {
-                    sdbuild: config.buildId.toString()
+                    sdbuild: `${this.prefix}${config.buildId}`
                 }
             }))
             .then(launchContainer => this._createContainer({
-                name: `${config.buildId}-build`,
+                name: `${this.prefix}${config.buildId}-build`,
                 Image: config.container,
                 Entrypoint: '/opt/sd/tini',
                 Labels: {
-                    sdbuild: config.buildId.toString()
+                    sdbuild: `${this.prefix}${config.buildId}`
                 },
                 Cmd: [
                     '--',
