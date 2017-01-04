@@ -22,6 +22,7 @@ The class has a variety of knobs to tweak when interacting with your Swarm insta
 | config.ecosystem | Object | Screwdriver Ecosystem (ui, api, store, etc.) |
 | config.fusebox | Object | [Circuit Breaker configuration][circuitbreaker] |
 | config.launchVersion | String | Launcher container version to use (stable) |
+| config.prefix | String | Prefix to container names ("") |
 ```js
 const executor = new DockerExecutor({
     docker: {
