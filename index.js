@@ -3,6 +3,7 @@
 /* eslint no-underscore-dangle: ["error", { "allowAfterThis": true }] */
 const Executor = require('screwdriver-executor-base');
 const hoek = require('hoek');
+const imageParser = require('docker-parse-image');
 const Fusebox = require('circuit-fuses');
 const Docker = require('dockerode');
 
@@ -121,7 +122,11 @@ class DockerExecutor extends Executor {
      * @return {Promise}
      */
     _start(config) {
-        const [buildImage, buildTag] = config.container.split(':');
+        const { fullname } = imageParser(config.container);
+        const containerNameParts = fullname.split(':');
+
+        const buildTag = containerNameParts.pop();
+        const buildImage = containerNameParts.join(':');
 
         return Promise.all(
             [
@@ -131,7 +136,7 @@ class DockerExecutor extends Executor {
                 }),
                 this._createImage({
                     fromImage: buildImage,
-                    tag: buildTag || 'latest'
+                    tag: buildTag
                 })
             ])
             .then(() => this._createContainer({

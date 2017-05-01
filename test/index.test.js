@@ -107,14 +107,22 @@ describe('index', function () {
         const apiUri = 'https://api.sd.cd';
         const token = '123456';
         let container = 'node:6';
+        const launcherImageArgs = {
+            fromImage: 'screwdrivercd/launcher',
+            tag: 'stable'
+        };
+        let buildArgs;
+        let launcherContainer;
+        let launcherArgs;
+        let buildContainer;
 
-        it('creates the required containers and starts them', () => {
-            const launcherContainer = {
+        beforeEach(() => {
+            launcherContainer = {
                 id: 'launcherID',
                 start: sinon.stub().yieldsAsync(new Error()),
                 remove: sinon.stub().yieldsAsync(new Error())
             };
-            const launcherArgs = {
+            launcherArgs = {
                 name: `${buildId}-init`,
                 Image: 'screwdrivercd/launcher:stable',
                 Entrypoint: '/bin/true',
@@ -122,16 +130,12 @@ describe('index', function () {
                     sdbuild: buildId.toString()
                 }
             };
-            const launcherImageArgs = {
-                fromImage: 'screwdrivercd/launcher',
-                tag: 'stable'
-            };
-            const buildContainer = {
+            buildContainer = {
                 id: 'buildID',
                 start: sinon.stub().yieldsAsync(null),
                 remove: sinon.stub().yieldsAsync(new Error())
             };
-            const buildArgs = {
+            buildArgs = {
                 name: `${buildId}-build`,
                 Image: container,
                 Entrypoint: '/opt/sd/tini',
@@ -171,8 +175,11 @@ describe('index', function () {
                     ]
                 }
             };
+        });
+
+        it('creates the required containers and starts them', () => {
             const buildImageArgs = {
-                fromImage: 'node',
+                fromImage: 'library/node',
                 tag: '6'
             };
 
@@ -197,12 +204,12 @@ describe('index', function () {
 
         it('supports prefixed containers', () => {
             const prefix = 'beta_';
-            const launcherContainer = {
-                id: 'launcherID',
-                start: sinon.stub().yieldsAsync(new Error()),
-                remove: sinon.stub().yieldsAsync(new Error())
+            const buildImageArgs = {
+                fromImage: 'library/node',
+                tag: '6'
             };
-            const launcherArgs = {
+
+            launcherArgs = {
                 name: `${prefix}${buildId}-init`,
                 Image: 'screwdrivercd/launcher:stable',
                 Entrypoint: '/bin/true',
@@ -210,16 +217,7 @@ describe('index', function () {
                     sdbuild: `${prefix}${buildId}`
                 }
             };
-            const launcherImageArgs = {
-                fromImage: 'screwdrivercd/launcher',
-                tag: 'stable'
-            };
-            const buildContainer = {
-                id: 'buildID',
-                start: sinon.stub().yieldsAsync(null),
-                remove: sinon.stub().yieldsAsync(new Error())
-            };
-            const buildArgs = {
+            buildArgs = {
                 name: `${prefix}${buildId}-build`,
                 Image: container,
                 Entrypoint: '/opt/sd/tini',
@@ -259,10 +257,6 @@ describe('index', function () {
                     ]
                 }
             };
-            const buildImageArgs = {
-                fromImage: 'node',
-                tag: '6'
-            };
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
             dockerMock.createContainer.withArgs(launcherArgs)
@@ -293,74 +287,69 @@ describe('index', function () {
         });
 
         it('creates containers without specifying a tag', () => {
-            container = 'node';
-
-            const launcherContainer = {
-                id: 'launcherID',
-                start: sinon.stub().yieldsAsync(new Error()),
-                remove: sinon.stub().yieldsAsync(new Error())
-            };
-            const launcherArgs = {
-                name: `${buildId}-init`,
-                Image: 'screwdrivercd/launcher:stable',
-                Entrypoint: '/bin/true',
-                Labels: {
-                    sdbuild: buildId.toString()
-                }
-            };
-            const launcherImageArgs = {
-                fromImage: 'screwdrivercd/launcher',
-                tag: 'stable'
-            };
-            const buildContainer = {
-                id: 'buildID',
-                start: sinon.stub().yieldsAsync(null),
-                remove: sinon.stub().yieldsAsync(new Error())
-            };
-            const buildArgs = {
-                name: `${buildId}-build`,
-                Image: container,
-                Entrypoint: '/opt/sd/tini',
-                Labels: {
-                    sdbuild: buildId.toString()
-                },
-                Cmd: [
-                    '--',
-                    '/bin/sh',
-                    '-c', [
-                        '/opt/sd/launch',
-                        '--api-uri',
-                        'api',
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        buildId,
-                        '&',
-                        '/opt/sd/logservice',
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        '--api-uri',
-                        'store',
-                        '--build',
-                        buildId,
-                        '&',
-                        'wait $(jobs -p)'
-                    ].join(' ')
-                ],
-                Env: [
-                    `SD_TOKEN=${token}`
-                ],
-                HostConfig: {
-                    Memory: 2 * 1024 * 1024 * 1024,
-                    MemoryLimit: 3 * 1024 * 1024 * 1024,
-                    VolumesFrom: [
-                        'launcherID:rw'
-                    ]
-                }
-            };
             const buildImageArgs = {
-                fromImage: 'node',
+                fromImage: 'library/node',
                 tag: 'latest'
             };
+
+            container = 'node';
+            buildArgs.Image = container;
+
+            dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
+            dockerMock.createContainer.withArgs(launcherArgs)
+                .yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs)
+                .yieldsAsync(null, buildContainer);
+
+            return executor.start({
+                buildId, container, apiUri, token
+            }).then(() => {
+                assert.calledWith(dockerMock.createImage, buildImageArgs);
+                assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                assert.callCount(dockerMock.createImage, 2);
+                assert.calledWith(dockerMock.createContainer, buildArgs);
+                assert.calledWith(dockerMock.createContainer, launcherArgs);
+                assert.callCount(dockerMock.createContainer, 2);
+                assert.callCount(buildContainer.start, 1);
+            });
+        });
+
+        it('creates containers from a private docker registry and starts them', () => {
+            const buildImageArgs = {
+                fromImage: 'docker-registry.foo.bar:1111/library/someImage',
+                tag: 'latest'
+            };
+
+            container = 'docker-registry.foo.bar:1111/someImage:latest';
+            buildArgs.Image = container;
+
+            dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
+            dockerMock.createContainer.withArgs(launcherArgs)
+                .yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs)
+                .yieldsAsync(null, buildContainer);
+
+            return executor.start({
+                buildId, container, apiUri, token
+            }).then(() => {
+                assert.calledWith(dockerMock.createImage, buildImageArgs);
+                assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                assert.callCount(dockerMock.createImage, 2);
+                assert.calledWith(dockerMock.createContainer, buildArgs);
+                assert.calledWith(dockerMock.createContainer, launcherArgs);
+                assert.callCount(dockerMock.createContainer, 2);
+                assert.callCount(buildContainer.start, 1);
+            });
+        });
+
+        it('creates containers from a private docker registry without specifying a tag', () => {
+            const buildImageArgs = {
+                fromImage: 'docker-registry.foo.bar:1111/library/someImage',
+                tag: 'latest'
+            };
+
+            container = 'docker-registry.foo.bar:1111/someImage';
+            buildArgs.Image = container;
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
             dockerMock.createContainer.withArgs(launcherArgs)
