@@ -34,7 +34,7 @@ const executor = new DockerExecutor({
 
 ### Methods
 
-For more information on `start`, `stop`, and `stats` please see the [executor-base-class].
+For more information on `start`, `stop`, and `stats` please see the [executor-base].
 
 ## Testing
 
@@ -58,4 +58,4 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 [daviddm-url]: https://david-dm.org/screwdriver-cd/executor-docker
 [dockerode]: https://www.npmjs.com/package/dockerode#getting-started
 [circuitbreaker]: https://www.npmjs.com/package/circuit-fuses#constructor
-[executor-base-class]: https://github.com/screwdriver-cd/executor-base
+[executor-base]: https://github.com/screwdriver-cd/executor-base
