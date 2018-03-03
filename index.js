@@ -122,11 +122,9 @@ class DockerExecutor extends Executor {
      * @return {Promise}
      */
     _start(config) {
-        const { fullname } = imageParser(config.container);
-        const containerNameParts = fullname.split(':');
-
-        const buildTag = containerNameParts.pop();
-        const buildImage = containerNameParts.join(':');
+        const piecesParts = imageParser(config.container);
+        const buildTag = piecesParts.tag
+        const buildImage = piecesParts.name
 
         return Promise.all(
             [
