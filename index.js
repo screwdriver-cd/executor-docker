@@ -123,8 +123,8 @@ class DockerExecutor extends Executor {
      */
     _start(config) {
         const piecesParts = imageParser(config.container);
-        const buildTag = piecesParts.tag
-        const buildImage = piecesParts.name
+        const buildTag = piecesParts.tag;
+        const buildImage = piecesParts.name;
 
         return Promise.all(
             [
