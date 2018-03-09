@@ -121,12 +121,32 @@ class DockerExecutor extends Executor {
      * @param  {String}   config.token      JWT for the Build
      * @return {Promise}
      */
-    _start(config) {
-        const { fullname } = imageParser(config.container);
-        const containerNameParts = fullname.split(':');
 
-        const buildTag = containerNameParts.pop();
-        const buildImage = containerNameParts.join(':');
+    _start(config) {
+        const piecesParts = imageParser(config.container);
+        let buildTag = piecesParts.tag;
+        let buildImage = piecesParts.name;
+
+        /**
+         *
+         * the docker-parse-image returns a fullname that always contains
+         * a namespace, which defaults to 'library' if no namespace is specified.
+         * perhaps library is the historical place to put things? but,
+         * my private registry does not work with 'library' injected in to the
+         * docker image name.  In other words, if I try to parse:
+         * 'myregistry.private.com/myimage'
+         * i end up with
+         * 'myregistry.private.com/library/myimage:latest'
+         * there is no library namespace in my private registry, so this fails.
+         */
+        if (piecesParts.tag !== null && piecesParts.tag !== 'latest') {
+            const containerNameParts = piecesParts.name.split(':');
+
+            containerNameParts.pop();
+            buildImage = containerNameParts.join(':');
+        } else {
+            buildTag = 'latest';
+        }
 
         return Promise.all(
             [

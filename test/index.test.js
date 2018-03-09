@@ -181,7 +181,7 @@ describe('index', function () {
 
         it('creates the required containers and starts them', () => {
             const buildImageArgs = {
-                fromImage: 'library/node',
+                fromImage: 'node',
                 tag: '6'
             };
 
@@ -207,7 +207,7 @@ describe('index', function () {
         it('supports prefixed containers', () => {
             const prefix = 'beta_';
             const buildImageArgs = {
-                fromImage: 'library/node',
+                fromImage: 'node',
                 tag: '6'
             };
 
@@ -292,7 +292,7 @@ describe('index', function () {
 
         it('creates containers without specifying a tag', () => {
             const buildImageArgs = {
-                fromImage: 'library/node',
+                fromImage: 'node',
                 tag: 'latest'
             };
 
@@ -320,7 +320,7 @@ describe('index', function () {
 
         it('creates containers from a private docker registry and starts them', () => {
             const buildImageArgs = {
-                fromImage: 'docker-registry.foo.bar:1111/library/someImage',
+                fromImage: 'docker-registry.foo.bar:1111/someImage',
                 tag: 'latest'
             };
 
@@ -348,7 +348,7 @@ describe('index', function () {
 
         it('creates containers from a private docker registry without specifying a tag', () => {
             const buildImageArgs = {
-                fromImage: 'docker-registry.foo.bar:1111/library/someImage',
+                fromImage: 'docker-registry.foo.bar:1111/someImage',
                 tag: 'latest'
             };
 
