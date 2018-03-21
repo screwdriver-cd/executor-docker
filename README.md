@@ -3,7 +3,7 @@
 
 > Docker Executor for Screwdriver
 
-This is an executor for the Screwdriver CD solution that interacts with Docker (local and swarm).
+This is an executor for the Screwdriver CD solution that interacts with Docker (local and remote).
 
 ## Usage
 
@@ -13,7 +13,7 @@ npm install screwdriver-executor-docker
 
 ### Initialization
 
-The class has a variety of knobs to tweak when interacting with your Swarm instance.
+The class has a variety of knobs to tweak when interacting with Docker.
 
 | Parameter        | Type  |  Description |
 | :-------------   | :---- | :-------------|
