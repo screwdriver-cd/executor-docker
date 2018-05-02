@@ -500,4 +500,12 @@ describe('index', function () {
             }, executor.stats());
         });
     });
+
+    describe('periodic', () => {
+        it('resolves to null when calling periodic start',
+            () => executor.startPeriodic().then(res => assert.isNull(res)));
+
+        it('resolves to null when calling periodic stop',
+            () => executor.stopPeriodic().then(res => assert.isNull(res)));
+    });
 });
