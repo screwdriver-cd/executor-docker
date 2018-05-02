@@ -49,6 +49,6 @@
     "docker-parse-image": "^3.0.1",
     "dockerode": "^2.3.1",
     "hoek": "^5.0.3",
-    "screwdriver-executor-base": "^5.2.0"
+    "screwdriver-executor-base": "^6.1.0"
   }
 }
