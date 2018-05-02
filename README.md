@@ -3,7 +3,7 @@
 
 > Docker Executor for Screwdriver
 
-This is an executor for the Screwdriver CD that interacts with Docker (local and remote).
+This is an executor for Screwdriver CD that interacts with Docker (local and remote).
 
 ## Usage
 
