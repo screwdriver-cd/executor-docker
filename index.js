@@ -150,6 +150,8 @@ class DockerExecutor extends Executor {
 
         return Promise.all(
             [
+                // exchange temporal JWT to build JWT
+                this.exchangeTokenForBuild(config),
                 this._createImage({
                     fromImage: 'screwdrivercd/launcher',
                     tag: this.launchVersion
