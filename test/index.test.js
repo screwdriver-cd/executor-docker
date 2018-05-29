@@ -105,7 +105,7 @@ describe('index', function () {
     describe('start', () => {
         const buildId = 1992;
         const apiUri = 'https://api.sd.cd';
-        let token = '123456';
+        const token = '123456';
         let container = 'node:6';
         const launcherImageArgs = {
             fromImage: 'screwdrivercd/launcher',
@@ -119,7 +119,8 @@ describe('index', function () {
 
         beforeEach(() => {
             exchangeTokenStub = sinon.stub(executor, 'exchangeTokenForBuild');
-            exchangeTokenStub.resolves(token = '7890123');
+            exchangeTokenStub.resolves();
+
             launcherContainer = {
                 id: 'launcherID',
                 start: sinon.stub().yieldsAsync(new Error()),
@@ -204,7 +205,6 @@ describe('index', function () {
                 assert.calledWith(dockerMock.createContainer, launcherArgs);
                 assert.callCount(dockerMock.createContainer, 2);
                 assert.callCount(buildContainer.start, 1);
-                assert.equal(token, '7890123');
             });
         });
 
@@ -282,7 +282,7 @@ describe('index', function () {
             });
 
             exchangeTokenStub = sinon.stub(executor, 'exchangeTokenForBuild');
-            exchangeTokenStub.resolves(token = '7890123');
+            exchangeTokenStub.resolves();
 
             return executor.start({
                 buildId, container, apiUri, token
@@ -294,7 +294,6 @@ describe('index', function () {
                 assert.calledWith(dockerMock.createContainer, launcherArgs);
                 assert.callCount(dockerMock.createContainer, 2);
                 assert.callCount(buildContainer.start, 1);
-                assert.equal(token, '7890123');
             });
         });
 
@@ -323,7 +322,6 @@ describe('index', function () {
                 assert.calledWith(dockerMock.createContainer, launcherArgs);
                 assert.callCount(dockerMock.createContainer, 2);
                 assert.callCount(buildContainer.start, 1);
-                assert.equal(token, '7890123');
             });
         });
 
@@ -352,7 +350,6 @@ describe('index', function () {
                 assert.calledWith(dockerMock.createContainer, launcherArgs);
                 assert.callCount(dockerMock.createContainer, 2);
                 assert.callCount(buildContainer.start, 1);
-                assert.equal(token, '7890123');
             });
         });
 
@@ -381,7 +378,6 @@ describe('index', function () {
                 assert.calledWith(dockerMock.createContainer, launcherArgs);
                 assert.callCount(dockerMock.createContainer, 2);
                 assert.callCount(buildContainer.start, 1);
-                assert.equal(token, '7890123');
             });
         });
 
