@@ -119,7 +119,7 @@ describe('index', function () {
 
         beforeEach(() => {
             exchangeTokenStub = sinon.stub(executor, 'exchangeTokenForBuild');
-            exchangeTokenStub.resolves();
+            exchangeTokenStub.resolves('someBuildToken');
 
             launcherContainer = {
                 id: 'launcherID',
@@ -171,7 +171,7 @@ describe('index', function () {
                     ].join(' ')
                 ],
                 Env: [
-                    `SD_TOKEN=${token}`
+                    'SD_TOKEN=someBuildToken'
                 ],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
@@ -255,7 +255,7 @@ describe('index', function () {
                     ].join(' ')
                 ],
                 Env: [
-                    `SD_TOKEN=${token}`
+                    'SD_TOKEN=someBuildToken'
                 ],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
@@ -282,7 +282,7 @@ describe('index', function () {
             });
 
             exchangeTokenStub = sinon.stub(executor, 'exchangeTokenForBuild');
-            exchangeTokenStub.resolves();
+            exchangeTokenStub.resolves('someBuildToken');
 
             return executor.start({
                 buildId, container, apiUri, token
