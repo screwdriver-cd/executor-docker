@@ -201,6 +201,8 @@ class DockerExecutor extends Executor {
                         '--emitter',
                         '/opt/sd/emitter',
                         '--api-uri',
+                        this.ecosystem.api,
+                        '--store-uri',
                         this.ecosystem.store,
                         '--build',
                         config.buildId,
