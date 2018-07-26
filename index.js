@@ -150,8 +150,6 @@ class DockerExecutor extends Executor {
 
         return Promise.all(
             [
-                // exchange temporal JWT to build JWT
-                this.exchangeTokenForBuild(config),
                 this._createImage({
                     fromImage: 'screwdrivercd/launcher',
                     tag: this.launchVersion
@@ -161,18 +159,14 @@ class DockerExecutor extends Executor {
                     tag: buildTag
                 })
             ])
-            .then((results) => {
-                config.token = results[0];
-
-                return this._createContainer({
-                    name: `${this.prefix}${config.buildId}-init`,
-                    Image: `screwdrivercd/launcher:${this.launchVersion}`,
-                    Entrypoint: '/bin/true',
-                    Labels: {
-                        sdbuild: `${this.prefix}${config.buildId}`
-                    }
-                });
-            })
+            .then(() => this._createContainer({
+                name: `${this.prefix}${config.buildId}-init`,
+                Image: `screwdrivercd/launcher:${this.launchVersion}`,
+                Entrypoint: '/bin/true',
+                Labels: {
+                    sdbuild: `${this.prefix}${config.buildId}`
+                }
+            }))
             .then(launchContainer => this._createContainer({
                 name: `${this.prefix}${config.buildId}-build`,
                 Image: config.container,

@@ -115,12 +115,8 @@ describe('index', function () {
         let launcherContainer;
         let launcherArgs;
         let buildContainer;
-        let exchangeTokenStub;
 
         beforeEach(() => {
-            exchangeTokenStub = sinon.stub(executor, 'exchangeTokenForBuild');
-            exchangeTokenStub.resolves('someBuildToken');
-
             launcherContainer = {
                 id: 'launcherID',
                 start: sinon.stub().yieldsAsync(new Error()),
@@ -173,7 +169,7 @@ describe('index', function () {
                     ].join(' ')
                 ],
                 Env: [
-                    'SD_TOKEN=someBuildToken'
+                    `SD_TOKEN=${token}`
                 ],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
@@ -259,7 +255,7 @@ describe('index', function () {
                     ].join(' ')
                 ],
                 Env: [
-                    'SD_TOKEN=someBuildToken'
+                    `SD_TOKEN=${token}`
                 ],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
@@ -284,9 +280,6 @@ describe('index', function () {
                     store: 'store'
                 }
             });
-
-            exchangeTokenStub = sinon.stub(executor, 'exchangeTokenForBuild');
-            exchangeTokenStub.resolves('someBuildToken');
 
             return executor.start({
                 buildId, container, apiUri, token
