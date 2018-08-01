@@ -180,8 +180,19 @@ class DockerExecutor extends Executor {
                     '/bin/sh',
                     '-c',
                     [
+                        // Fetch build token
+                        'SD_TOKEN=`/opt/sd/launch',
+                        '--fetch-flag',
+                        '--api-uri',
+                        this.ecosystem.api,
+                        '--store-uri',
+                        this.ecosystem.store,
+                        '--emitter',
+                        '/opt/sd/emitter',
+                        config.buildId,
+                        '` &&',
                         // Run the launcher in the background
-                        '/opt/sd/launch',
+                        '(/opt/sd/launch',
                         '--api-uri',
                         this.ecosystem.api,
                         '--store-uri',
@@ -202,7 +213,7 @@ class DockerExecutor extends Executor {
                         config.buildId,
                         '&',
                         // Wait for both background jobs to complete
-                        'wait $(jobs -p)'
+                        'wait $(jobs -p))'
                     ].join(' ')
                 ],
                 Env: [

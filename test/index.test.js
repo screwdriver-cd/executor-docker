@@ -146,7 +146,17 @@ describe('index', function () {
                     '--',
                     '/bin/sh',
                     '-c', [
-                        '/opt/sd/launch',
+                        'SD_TOKEN=`/opt/sd/launch',
+                        '--fetch-flag',
+                        '--api-uri',
+                        'api',
+                        '--store-uri',
+                        'store',
+                        '--emitter',
+                        '/opt/sd/emitter',
+                        buildId,
+                        '` &&',
+                        '(/opt/sd/launch',
                         '--api-uri',
                         'api',
                         '--store-uri',
@@ -165,7 +175,7 @@ describe('index', function () {
                         '--build',
                         buildId,
                         '&',
-                        'wait $(jobs -p)'
+                        'wait $(jobs -p))'
                     ].join(' ')
                 ],
                 Env: [
@@ -232,7 +242,17 @@ describe('index', function () {
                     '--',
                     '/bin/sh',
                     '-c', [
-                        '/opt/sd/launch',
+                        'SD_TOKEN=`/opt/sd/launch',
+                        '--fetch-flag',
+                        '--api-uri',
+                        'api',
+                        '--store-uri',
+                        'store',
+                        '--emitter',
+                        '/opt/sd/emitter',
+                        buildId,
+                        '` &&',
+                        '(/opt/sd/launch',
                         '--api-uri',
                         'api',
                         '--store-uri',
@@ -251,7 +271,7 @@ describe('index', function () {
                         '--build',
                         buildId,
                         '&',
-                        'wait $(jobs -p)'
+                        'wait $(jobs -p))'
                     ].join(' ')
                 ],
                 Env: [
