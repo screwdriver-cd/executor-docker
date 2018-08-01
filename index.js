@@ -182,7 +182,7 @@ class DockerExecutor extends Executor {
                     [
                         // Fetch build token
                         'SD_TOKEN=`/opt/sd/launch',
-                        '--fetch-flag',
+                        '--only-fetch-token',
                         '--api-uri',
                         this.ecosystem.api,
                         '--store-uri',

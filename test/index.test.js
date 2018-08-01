@@ -147,7 +147,7 @@ describe('index', function () {
                     '/bin/sh',
                     '-c', [
                         'SD_TOKEN=`/opt/sd/launch',
-                        '--fetch-flag',
+                        '--only-fetch-token',
                         '--api-uri',
                         'api',
                         '--store-uri',
@@ -243,7 +243,7 @@ describe('index', function () {
                     '/bin/sh',
                     '-c', [
                         'SD_TOKEN=`/opt/sd/launch',
-                        '--fetch-flag',
+                        '--only-fetch-token',
                         '--api-uri',
                         'api',
                         '--store-uri',
