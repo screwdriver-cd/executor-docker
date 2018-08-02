@@ -7,6 +7,8 @@ const imageParser = require('docker-parse-image');
 const Fusebox = require('circuit-fuses');
 const Docker = require('dockerode');
 
+const DEFAULT_BUILD_TIMEOUT = 90; // 90 minutes
+
 class DockerExecutor extends Executor {
     /**
      * Constructor
@@ -180,42 +182,13 @@ class DockerExecutor extends Executor {
                     '/bin/sh',
                     '-c',
                     [
-                        // Fetch build token
-                        'SD_TOKEN=`/opt/sd/launch',
-                        '--only-fetch-token',
-                        '--token',
+                        // Run the wrapper script
+                        '/opt/sd/run.sh',
                         `"${config.token}"`,
-                        '--api-uri',
                         this.ecosystem.api,
-                        '--store-uri',
                         this.ecosystem.store,
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        config.buildId,
-                        '` &&',
-                        // Run the launcher in the background
-                        '(/opt/sd/launch',
-                        '--api-uri',
-                        this.ecosystem.api,
-                        '--store-uri',
-                        this.ecosystem.store,
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        config.buildId,
-                        '&',
-                        // Run the logservice in the background
-                        '/opt/sd/logservice',
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        '--api-uri',
-                        this.ecosystem.api,
-                        '--store-uri',
-                        this.ecosystem.store,
-                        '--build',
-                        config.buildId,
-                        '&',
-                        // Wait for both background jobs to complete
-                        'wait $(jobs -p))'
+                        DEFAULT_BUILD_TIMEOUT,
+                        config.buildId
                     ].join(' ')
                 ],
                 HostConfig: {
