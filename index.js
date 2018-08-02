@@ -183,6 +183,8 @@ class DockerExecutor extends Executor {
                         // Fetch build token
                         'SD_TOKEN=`/opt/sd/launch',
                         '--only-fetch-token',
+                        '--token',
+                        `"${config.token}"`,
                         '--api-uri',
                         this.ecosystem.api,
                         '--store-uri',
@@ -215,9 +217,6 @@ class DockerExecutor extends Executor {
                         // Wait for both background jobs to complete
                         'wait $(jobs -p))'
                     ].join(' ')
-                ],
-                Env: [
-                    `SD_TOKEN=${config.token}`
                 ],
                 HostConfig: {
                     // 2 GB of memory

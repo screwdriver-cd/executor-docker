@@ -148,6 +148,8 @@ describe('index', function () {
                     '-c', [
                         'SD_TOKEN=`/opt/sd/launch',
                         '--only-fetch-token',
+                        '--token',
+                        `"${token}"`,
                         '--api-uri',
                         'api',
                         '--store-uri',
@@ -177,9 +179,6 @@ describe('index', function () {
                         '&',
                         'wait $(jobs -p))'
                     ].join(' ')
-                ],
-                Env: [
-                    `SD_TOKEN=${token}`
                 ],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
@@ -244,6 +243,8 @@ describe('index', function () {
                     '-c', [
                         'SD_TOKEN=`/opt/sd/launch',
                         '--only-fetch-token',
+                        '--token',
+                        `"${token}"`,
                         '--api-uri',
                         'api',
                         '--store-uri',
@@ -273,9 +274,6 @@ describe('index', function () {
                         '&',
                         'wait $(jobs -p))'
                     ].join(' ')
-                ],
-                Env: [
-                    `SD_TOKEN=${token}`
                 ],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
