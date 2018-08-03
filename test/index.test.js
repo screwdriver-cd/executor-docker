@@ -146,30 +146,13 @@ describe('index', function () {
                     '--',
                     '/bin/sh',
                     '-c', [
-                        '/opt/sd/launch',
-                        '--api-uri',
+                        '/opt/sd/run.sh',
+                        `"${token}"`,
                         'api',
-                        '--store-uri',
                         'store',
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        buildId,
-                        '&',
-                        '/opt/sd/logservice',
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        '--api-uri',
-                        'api',
-                        '--store-uri',
-                        'store',
-                        '--build',
-                        buildId,
-                        '&',
-                        'wait $(jobs -p)'
+                        '90',
+                        buildId
                     ].join(' ')
-                ],
-                Env: [
-                    `SD_TOKEN=${token}`
                 ],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
@@ -232,30 +215,13 @@ describe('index', function () {
                     '--',
                     '/bin/sh',
                     '-c', [
-                        '/opt/sd/launch',
-                        '--api-uri',
+                        '/opt/sd/run.sh',
+                        `"${token}"`,
                         'api',
-                        '--store-uri',
                         'store',
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        buildId,
-                        '&',
-                        '/opt/sd/logservice',
-                        '--emitter',
-                        '/opt/sd/emitter',
-                        '--api-uri',
-                        'api',
-                        '--store-uri',
-                        'store',
-                        '--build',
-                        buildId,
-                        '&',
-                        'wait $(jobs -p)'
+                        '90',
+                        buildId
                     ].join(' ')
-                ],
-                Env: [
-                    `SD_TOKEN=${token}`
                 ],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
