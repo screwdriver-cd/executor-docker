@@ -138,14 +138,12 @@ describe('index', function () {
             buildArgs = {
                 name: `${buildId}-build`,
                 Image: container,
-                Entrypoint: '/opt/sd/tini',
+                Entrypoint: '/opt/sd/launcher_entrypoint.sh',
                 Labels: {
                     sdbuild: buildId.toString()
                 },
                 Cmd: [
-                    '--',
-                    '/bin/sh',
-                    '-c', [
+                    [
                         '/opt/sd/run.sh',
                         `"${token}"`,
                         'api',
@@ -207,14 +205,12 @@ describe('index', function () {
             buildArgs = {
                 name: `${prefix}${buildId}-build`,
                 Image: container,
-                Entrypoint: '/opt/sd/tini',
+                Entrypoint: '/opt/sd/launcher_entrypoint.sh',
                 Labels: {
                     sdbuild: `${prefix}${buildId}`
                 },
                 Cmd: [
-                    '--',
-                    '/bin/sh',
-                    '-c', [
+                    [
                         '/opt/sd/run.sh',
                         `"${token}"`,
                         'api',

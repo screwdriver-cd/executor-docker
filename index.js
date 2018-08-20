@@ -172,15 +172,11 @@ class DockerExecutor extends Executor {
             .then(launchContainer => this._createContainer({
                 name: `${this.prefix}${config.buildId}-build`,
                 Image: config.container,
-                Entrypoint: '/opt/sd/tini',
+                Entrypoint: '/opt/sd/launcher_entrypoint.sh',
                 Labels: {
                     sdbuild: `${this.prefix}${config.buildId}`
                 },
                 Cmd: [
-                    '--',
-                    // Run a shell command
-                    '/bin/sh',
-                    '-c',
                     [
                         // Run the wrapper script
                         '/opt/sd/run.sh',
