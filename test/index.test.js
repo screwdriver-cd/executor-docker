@@ -4,8 +4,6 @@ const assert = require('chai').assert;
 const sinon = require('sinon');
 const mockery = require('mockery');
 
-require('sinon-as-promised');
-
 sinon.assert.expose(assert, { prefix: '' });
 
 describe('index', function () {
