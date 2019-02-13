@@ -472,4 +472,12 @@ describe('index', function () {
         it('resolves to null when calling periodic stop',
             () => executor.stopPeriodic().then(res => assert.isNull(res)));
     });
+
+    describe('frozen', () => {
+        it('resolves to null when calling frozen start',
+            () => executor.startFrozen().then(res => assert.isNull(res)));
+
+        it('resolves to null when calling frozen stop',
+            () => executor.stopFrozen().then(res => assert.isNull(res)));
+    });
 });
