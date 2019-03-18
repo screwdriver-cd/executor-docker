@@ -147,7 +147,8 @@ describe('index', function () {
                         'api',
                         'store',
                         '90',
-                        buildId
+                        buildId,
+                        'ui'
                     ].join(' ')
                 ],
                 HostConfig: {
@@ -214,7 +215,8 @@ describe('index', function () {
                         'api',
                         'store',
                         '90',
-                        buildId
+                        buildId,
+                        'ui'
                     ].join(' ')
                 ],
                 HostConfig: {
