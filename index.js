@@ -17,6 +17,7 @@ class DockerExecutor extends Executor {
      * @param  {Object} options.ecosystem                        Screwdriver Ecosystem
      * @param  {Object} options.ecosystem.api                    Routable URI to Screwdriver API
      * @param  {Object} options.ecosystem.store                  Routable URI to Screwdriver Store
+     * @param  {Object} options.ecosystem.ui                     Routable URI to Screwdriver UI
      * @param  {Object} [options.docker]                         Docker configuration
      * @param  {String} [options.docker.protocol]                Protocol to use
      * @param  {String} [options.docker.host]                    Docker Swarm host to interact with
@@ -184,7 +185,8 @@ class DockerExecutor extends Executor {
                         this.ecosystem.api,
                         this.ecosystem.store,
                         DEFAULT_BUILD_TIMEOUT,
-                        config.buildId
+                        config.buildId,
+                        this.ecosystem.ui
                     ].join(' ')
                 ],
                 HostConfig: {
