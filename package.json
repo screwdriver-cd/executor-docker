@@ -44,7 +44,7 @@
     "sinon": "^7.1.0"
   },
   "dependencies": {
-    "circuit-fuses": "^2.1.0",
+    "circuit-fuses": "^4.0.4",
     "docker-parse-image": "^3.0.1",
     "dockerode": "^2.5.8",
     "hoek": "^5.0.4",

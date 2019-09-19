@@ -4,7 +4,7 @@
 const Executor = require('screwdriver-executor-base');
 const hoek = require('hoek');
 const imageParser = require('docker-parse-image');
-const Fusebox = require('circuit-fuses');
+const Fusebox = require('circuit-fuses').breaker;
 const Docker = require('dockerode');
 
 const DEFAULT_BUILD_TIMEOUT = 90; // 90 minutes
