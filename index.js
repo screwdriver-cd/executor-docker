@@ -129,6 +129,9 @@ class DockerExecutor extends Executor {
         const piecesParts = imageParser(config.container);
         let buildTag = piecesParts.tag;
         let buildImage = piecesParts.name;
+        const buildTimeout = hoek.reach(config, 'annotations>screwdriver.cd/timeout',
+            { separator: '>' });
+        const timeout = parseInt(buildTimeout || DEFAULT_BUILD_TIMEOUT, 10);
 
         /**
          *
@@ -184,7 +187,7 @@ class DockerExecutor extends Executor {
                         `"${config.token}"`,
                         this.ecosystem.api,
                         this.ecosystem.store,
-                        DEFAULT_BUILD_TIMEOUT,
+                        timeout,
                         config.buildId,
                         this.ecosystem.ui
                     ].join(' ')
