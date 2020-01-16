@@ -186,6 +186,49 @@ describe('index', function () {
             });
         });
 
+        it('creates the containers with correct args from build config', () => {
+            const buildImageArgs = {
+                fromImage: 'node',
+                tag: '6'
+            };
+
+            buildArgs.Cmd = [
+                [
+                    '/opt/sd/run.sh',
+                    `"${token}"`,
+                    'api',
+                    'store',
+                    5,
+                    buildId,
+                    'ui'
+                ].join(' ')
+            ];
+
+            dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
+            dockerMock.createContainer.withArgs(launcherArgs)
+                .yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs)
+                .yieldsAsync(null, buildContainer);
+
+            return executor.start({
+                buildId,
+                container,
+                apiUri,
+                token,
+                annotations: {
+                    'screwdriver.cd/timeout': 5
+                }
+            }).then(() => {
+                assert.calledWith(dockerMock.createImage, buildImageArgs);
+                assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                assert.callCount(dockerMock.createImage, 2);
+                assert.calledWith(dockerMock.createContainer, buildArgs);
+                assert.calledWith(dockerMock.createContainer, launcherArgs);
+                assert.callCount(dockerMock.createContainer, 2);
+                assert.callCount(buildContainer.start, 1);
+            });
+        });
+
         it('supports prefixed containers', () => {
             const prefix = 'beta_';
             const buildImageArgs = {
