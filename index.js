@@ -39,11 +39,15 @@ class DockerExecutor extends Executor {
         this.docker = new Docker(options.docker);
         this.launchVersion = options.launchVersion || 'stable';
         this.prefix = options.prefix || '';
-        this.breaker = new Fusebox((obj, cb) => obj.func(cb), hoek.applyToDefaults({
+
+        const breakerOptions = hoek.applyToDefaults({
             breaker: {
-                timeout: 5 * 60 * 1000 // Default to 5 minute timeout
+                maxFailures: 10,
+                timeout: 5 * 60 * 1000 // Default to 5 minute timeout,
             }
-        }, options.fusebox));
+        }, options.fusebox || {});
+
+        this.breaker = new Fusebox((obj, cb) => obj.func(cb), breakerOptions);
     }
 
     /**
