@@ -1,6 +1,6 @@
 {
   "name": "screwdriver-executor-docker",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Docker Swarm Executor for Screwdriver",
   "main": "index.js",
   "scripts": {
@@ -45,10 +45,10 @@
     "sinon": "^7.1.0"
   },
   "dependencies": {
+    "@hapi/hoek": "^9.0.4",
     "circuit-fuses": "^4.0.4",
     "docker-parse-image": "^3.0.1",
     "dockerode": "^2.5.8",
-    "hoek": "^5.0.4",
     "screwdriver-executor-base": "^7.0.0"
   }
 }

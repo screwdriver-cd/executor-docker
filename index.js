@@ -2,7 +2,7 @@
 
 /* eslint no-underscore-dangle: ["error", { "allowAfterThis": true }] */
 const Executor = require('screwdriver-executor-base');
-const hoek = require('hoek');
+const hoek = require('@hapi/hoek');
 const imageParser = require('docker-parse-image');
 const Fusebox = require('circuit-fuses').breaker;
 const Docker = require('dockerode');
