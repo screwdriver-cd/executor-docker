@@ -1,6 +1,6 @@
 {
   "name": "screwdriver-executor-docker",
-  "version": "3.0.0",
+  "version": "5.0.0",
   "description": "Docker Swarm Executor for Screwdriver",
   "main": "index.js",
   "scripts": {
@@ -37,18 +37,18 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "eslint": "^4.19.1",
-    "eslint-config-screwdriver": "^3.0.1",
-    "mocha": "^7.0.1",
+    "eslint": "^7.7.0",
+    "eslint-config-screwdriver": "^5.0.4",
+    "mocha": "^8.1.1",
     "mockery": "^2.0.0",
     "nyc": "^15.0.0",
-    "sinon": "^7.1.0"
+    "sinon": "^9.0.3"
   },
   "dependencies": {
     "@hapi/hoek": "^9.0.4",
     "circuit-fuses": "^4.0.4",
     "docker-parse-image": "^3.0.1",
     "dockerode": "^2.5.8",
-    "screwdriver-executor-base": "^7.0.0"
+    "screwdriver-executor-base": "^8.0.0"
   }
 }
