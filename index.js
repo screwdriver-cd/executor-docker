@@ -40,12 +40,15 @@ class DockerExecutor extends Executor {
         this.launchVersion = options.launchVersion || 'stable';
         this.prefix = options.prefix || '';
 
-        const breakerOptions = hoek.applyToDefaults({
-            breaker: {
-                maxFailures: 10,
-                timeout: 5 * 60 * 1000 // Default to 5 minute timeout,
-            }
-        }, options.fusebox || {});
+        const breakerOptions = hoek.applyToDefaults(
+            {
+                breaker: {
+                    maxFailures: 10,
+                    timeout: 5 * 60 * 1000 // Default to 5 minute timeout,
+                }
+            },
+            options.fusebox || {}
+        );
 
         this.breaker = new Fusebox((obj, cb) => obj.func(cb), breakerOptions);
     }
@@ -107,16 +110,16 @@ class DockerExecutor extends Executor {
     _findContainers(buildId) {
         const listArgs = {
             filters: JSON.stringify({
-                label: [
-                    `sdbuild=${this.prefix}${buildId}`
-                ]
+                label: [`sdbuild=${this.prefix}${buildId}`]
             }),
             all: true
         };
 
-        return this.breaker.runCommand({
-            func: cb => this.docker.listContainers(listArgs, cb)
-        }).then(containers => containers.map(container => this.docker.getContainer(container.Id)));
+        return this.breaker
+            .runCommand({
+                func: cb => this.docker.listContainers(listArgs, cb)
+            })
+            .then(containers => containers.map(container => this.docker.getContainer(container.Id)));
     }
 
     /**
@@ -133,8 +136,7 @@ class DockerExecutor extends Executor {
         const piecesParts = imageParser(config.container);
         let buildTag = piecesParts.tag;
         let buildImage = piecesParts.name;
-        const buildTimeout = hoek.reach(config, 'annotations>screwdriver.cd/timeout',
-            { separator: '>' });
+        const buildTimeout = hoek.reach(config, 'annotations>screwdriver.cd/timeout', { separator: '>' });
         const timeout = parseInt(buildTimeout || DEFAULT_BUILD_TIMEOUT, 10);
 
         /**
@@ -158,54 +160,55 @@ class DockerExecutor extends Executor {
             buildTag = 'latest';
         }
 
-        return Promise.all(
-            [
-                this._createImage({
-                    fromImage: 'screwdrivercd/launcher',
-                    tag: this.launchVersion
-                }),
-                this._createImage({
-                    fromImage: buildImage,
-                    tag: buildTag
+        return Promise.all([
+            this._createImage({
+                fromImage: 'screwdrivercd/launcher',
+                tag: this.launchVersion
+            }),
+            this._createImage({
+                fromImage: buildImage,
+                tag: buildTag
+            })
+        ])
+            .then(() =>
+                this._createContainer({
+                    name: `${this.prefix}${config.buildId}-init`,
+                    Image: `screwdrivercd/launcher:${this.launchVersion}`,
+                    Entrypoint: '/bin/true',
+                    Labels: {
+                        sdbuild: `${this.prefix}${config.buildId}`
+                    }
                 })
-            ])
-            .then(() => this._createContainer({
-                name: `${this.prefix}${config.buildId}-init`,
-                Image: `screwdrivercd/launcher:${this.launchVersion}`,
-                Entrypoint: '/bin/true',
-                Labels: {
-                    sdbuild: `${this.prefix}${config.buildId}`
-                }
-            }))
-            .then(launchContainer => this._createContainer({
-                name: `${this.prefix}${config.buildId}-build`,
-                Image: config.container,
-                Entrypoint: '/opt/sd/launcher_entrypoint.sh',
-                Labels: {
-                    sdbuild: `${this.prefix}${config.buildId}`
-                },
-                Cmd: [
-                    [
-                        // Run the wrapper script
-                        '/opt/sd/run.sh',
-                        `"${config.token}"`,
-                        this.ecosystem.api,
-                        this.ecosystem.store,
-                        timeout,
-                        config.buildId,
-                        this.ecosystem.ui
-                    ].join(' ')
-                ],
-                HostConfig: {
-                    // 2 GB of memory
-                    Memory: 2 * 1024 * 1024 * 1024,
-                    // 3 GB of memory + swap (aka, 1 GB of swap)
-                    MemoryLimit: 3 * 1024 * 1024 * 1024,
-                    VolumesFrom: [
-                        `${launchContainer.id}:rw`
-                    ]
-                }
-            }))
+            )
+            .then(launchContainer =>
+                this._createContainer({
+                    name: `${this.prefix}${config.buildId}-build`,
+                    Image: config.container,
+                    Entrypoint: '/opt/sd/launcher_entrypoint.sh',
+                    Labels: {
+                        sdbuild: `${this.prefix}${config.buildId}`
+                    },
+                    Cmd: [
+                        [
+                            // Run the wrapper script
+                            '/opt/sd/run.sh',
+                            `"${config.token}"`,
+                            this.ecosystem.api,
+                            this.ecosystem.store,
+                            timeout,
+                            config.buildId,
+                            this.ecosystem.ui
+                        ].join(' ')
+                    ],
+                    HostConfig: {
+                        // 2 GB of memory
+                        Memory: 2 * 1024 * 1024 * 1024,
+                        // 3 GB of memory + swap (aka, 1 GB of swap)
+                        MemoryLimit: 3 * 1024 * 1024 * 1024,
+                        VolumesFrom: [`${launchContainer.id}:rw`]
+                    }
+                })
+            )
             .then(buildContainer => this._startContainer(buildContainer));
     }
 
@@ -217,9 +220,9 @@ class DockerExecutor extends Executor {
      * @return {Promise}
      */
     _stop(config) {
-        return this._findContainers(config.buildId)
-            .then(containers => Promise.all(containers.map(container =>
-                this._removeContainer(container))));
+        return this._findContainers(config.buildId).then(containers =>
+            Promise.all(containers.map(container => this._removeContainer(container)))
+        );
     }
 
     /**
@@ -259,10 +262,10 @@ class DockerExecutor extends Executor {
     }
 
     /**
-    * Retreive stats for the executor/breaker
-    * @method stats
-    * @param  {Response} Object Object containing stats for the executor/breaker
-    */
+     * Retreive stats for the executor/breaker
+     * @method stats
+     * @param  {Response} Object Object containing stats for the executor/breaker
+     */
     stats() {
         return this.breaker.stats();
     }
