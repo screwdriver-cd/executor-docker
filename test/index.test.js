@@ -6,7 +6,7 @@ const mockery = require('mockery');
 
 sinon.assert.expose(assert, { prefix: '' });
 
-describe('index', function () {
+describe('index', function() {
     // Time not important. Only life important.
     this.timeout(5000);
 
@@ -140,23 +140,11 @@ describe('index', function () {
                 Labels: {
                     sdbuild: buildId.toString()
                 },
-                Cmd: [
-                    [
-                        '/opt/sd/run.sh',
-                        `"${token}"`,
-                        'api',
-                        'store',
-                        '90',
-                        buildId,
-                        'ui'
-                    ].join(' ')
-                ],
+                Cmd: [['/opt/sd/run.sh', `"${token}"`, 'api', 'store', '90', buildId, 'ui'].join(' ')],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
                     MemoryLimit: 3 * 1024 * 1024 * 1024,
-                    VolumesFrom: [
-                        'launcherID:rw'
-                    ]
+                    VolumesFrom: ['launcherID:rw']
                 }
             };
         });
@@ -168,22 +156,25 @@ describe('index', function () {
             };
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
-            dockerMock.createContainer.withArgs(launcherArgs)
-                .yieldsAsync(null, launcherContainer);
-            dockerMock.createContainer.withArgs(buildArgs)
-                .yieldsAsync(null, buildContainer);
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
 
-            return executor.start({
-                buildId, container, apiUri, token
-            }).then(() => {
-                assert.calledWith(dockerMock.createImage, buildImageArgs);
-                assert.calledWith(dockerMock.createImage, launcherImageArgs);
-                assert.callCount(dockerMock.createImage, 2);
-                assert.calledWith(dockerMock.createContainer, buildArgs);
-                assert.calledWith(dockerMock.createContainer, launcherArgs);
-                assert.callCount(dockerMock.createContainer, 2);
-                assert.callCount(buildContainer.start, 1);
-            });
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.createImage, buildImageArgs);
+                    assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                    assert.callCount(dockerMock.createImage, 2);
+                    assert.calledWith(dockerMock.createContainer, buildArgs);
+                    assert.calledWith(dockerMock.createContainer, launcherArgs);
+                    assert.callCount(dockerMock.createContainer, 2);
+                    assert.callCount(buildContainer.start, 1);
+                });
         });
 
         it('creates the containers with correct args from build config', () => {
@@ -192,41 +183,31 @@ describe('index', function () {
                 tag: '6'
             };
 
-            buildArgs.Cmd = [
-                [
-                    '/opt/sd/run.sh',
-                    `"${token}"`,
-                    'api',
-                    'store',
-                    5,
-                    buildId,
-                    'ui'
-                ].join(' ')
-            ];
+            buildArgs.Cmd = [['/opt/sd/run.sh', `"${token}"`, 'api', 'store', 5, buildId, 'ui'].join(' ')];
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
-            dockerMock.createContainer.withArgs(launcherArgs)
-                .yieldsAsync(null, launcherContainer);
-            dockerMock.createContainer.withArgs(buildArgs)
-                .yieldsAsync(null, buildContainer);
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
 
-            return executor.start({
-                buildId,
-                container,
-                apiUri,
-                token,
-                annotations: {
-                    'screwdriver.cd/timeout': 5
-                }
-            }).then(() => {
-                assert.calledWith(dockerMock.createImage, buildImageArgs);
-                assert.calledWith(dockerMock.createImage, launcherImageArgs);
-                assert.callCount(dockerMock.createImage, 2);
-                assert.calledWith(dockerMock.createContainer, buildArgs);
-                assert.calledWith(dockerMock.createContainer, launcherArgs);
-                assert.callCount(dockerMock.createContainer, 2);
-                assert.callCount(buildContainer.start, 1);
-            });
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token,
+                    annotations: {
+                        'screwdriver.cd/timeout': 5
+                    }
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.createImage, buildImageArgs);
+                    assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                    assert.callCount(dockerMock.createImage, 2);
+                    assert.calledWith(dockerMock.createContainer, buildArgs);
+                    assert.calledWith(dockerMock.createContainer, launcherArgs);
+                    assert.callCount(dockerMock.createContainer, 2);
+                    assert.callCount(buildContainer.start, 1);
+                });
         });
 
         it('supports prefixed containers', () => {
@@ -251,31 +232,17 @@ describe('index', function () {
                 Labels: {
                     sdbuild: `${prefix}${buildId}`
                 },
-                Cmd: [
-                    [
-                        '/opt/sd/run.sh',
-                        `"${token}"`,
-                        'api',
-                        'store',
-                        '90',
-                        buildId,
-                        'ui'
-                    ].join(' ')
-                ],
+                Cmd: [['/opt/sd/run.sh', `"${token}"`, 'api', 'store', '90', buildId, 'ui'].join(' ')],
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
                     MemoryLimit: 3 * 1024 * 1024 * 1024,
-                    VolumesFrom: [
-                        'launcherID:rw'
-                    ]
+                    VolumesFrom: ['launcherID:rw']
                 }
             };
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
-            dockerMock.createContainer.withArgs(launcherArgs)
-                .yieldsAsync(null, launcherContainer);
-            dockerMock.createContainer.withArgs(buildArgs)
-                .yieldsAsync(null, buildContainer);
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
 
             executor = new Executor({
                 prefix,
@@ -286,17 +253,22 @@ describe('index', function () {
                 }
             });
 
-            return executor.start({
-                buildId, container, apiUri, token
-            }).then(() => {
-                assert.calledWith(dockerMock.createImage, buildImageArgs);
-                assert.calledWith(dockerMock.createImage, launcherImageArgs);
-                assert.callCount(dockerMock.createImage, 2);
-                assert.calledWith(dockerMock.createContainer, buildArgs);
-                assert.calledWith(dockerMock.createContainer, launcherArgs);
-                assert.callCount(dockerMock.createContainer, 2);
-                assert.callCount(buildContainer.start, 1);
-            });
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.createImage, buildImageArgs);
+                    assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                    assert.callCount(dockerMock.createImage, 2);
+                    assert.calledWith(dockerMock.createContainer, buildArgs);
+                    assert.calledWith(dockerMock.createContainer, launcherArgs);
+                    assert.callCount(dockerMock.createContainer, 2);
+                    assert.callCount(buildContainer.start, 1);
+                });
         });
 
         it('creates containers without specifying a tag', () => {
@@ -309,22 +281,25 @@ describe('index', function () {
             buildArgs.Image = container;
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
-            dockerMock.createContainer.withArgs(launcherArgs)
-                .yieldsAsync(null, launcherContainer);
-            dockerMock.createContainer.withArgs(buildArgs)
-                .yieldsAsync(null, buildContainer);
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
 
-            return executor.start({
-                buildId, container, apiUri, token
-            }).then(() => {
-                assert.calledWith(dockerMock.createImage, buildImageArgs);
-                assert.calledWith(dockerMock.createImage, launcherImageArgs);
-                assert.callCount(dockerMock.createImage, 2);
-                assert.calledWith(dockerMock.createContainer, buildArgs);
-                assert.calledWith(dockerMock.createContainer, launcherArgs);
-                assert.callCount(dockerMock.createContainer, 2);
-                assert.callCount(buildContainer.start, 1);
-            });
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.createImage, buildImageArgs);
+                    assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                    assert.callCount(dockerMock.createImage, 2);
+                    assert.calledWith(dockerMock.createContainer, buildArgs);
+                    assert.calledWith(dockerMock.createContainer, launcherArgs);
+                    assert.callCount(dockerMock.createContainer, 2);
+                    assert.callCount(buildContainer.start, 1);
+                });
         });
 
         it('creates containers from a private docker registry and starts them', () => {
@@ -337,22 +312,25 @@ describe('index', function () {
             buildArgs.Image = container;
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
-            dockerMock.createContainer.withArgs(launcherArgs)
-                .yieldsAsync(null, launcherContainer);
-            dockerMock.createContainer.withArgs(buildArgs)
-                .yieldsAsync(null, buildContainer);
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
 
-            return executor.start({
-                buildId, container, apiUri, token
-            }).then(() => {
-                assert.calledWith(dockerMock.createImage, buildImageArgs);
-                assert.calledWith(dockerMock.createImage, launcherImageArgs);
-                assert.callCount(dockerMock.createImage, 2);
-                assert.calledWith(dockerMock.createContainer, buildArgs);
-                assert.calledWith(dockerMock.createContainer, launcherArgs);
-                assert.callCount(dockerMock.createContainer, 2);
-                assert.callCount(buildContainer.start, 1);
-            });
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.createImage, buildImageArgs);
+                    assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                    assert.callCount(dockerMock.createImage, 2);
+                    assert.calledWith(dockerMock.createContainer, buildArgs);
+                    assert.calledWith(dockerMock.createContainer, launcherArgs);
+                    assert.callCount(dockerMock.createContainer, 2);
+                    assert.callCount(buildContainer.start, 1);
+                });
         });
 
         it('creates containers from a private docker registry without specifying a tag', () => {
@@ -365,46 +343,61 @@ describe('index', function () {
             buildArgs.Image = container;
 
             dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
-            dockerMock.createContainer.withArgs(launcherArgs)
-                .yieldsAsync(null, launcherContainer);
-            dockerMock.createContainer.withArgs(buildArgs)
-                .yieldsAsync(null, buildContainer);
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
 
-            return executor.start({
-                buildId, container, apiUri, token
-            }).then(() => {
-                assert.calledWith(dockerMock.createImage, buildImageArgs);
-                assert.calledWith(dockerMock.createImage, launcherImageArgs);
-                assert.callCount(dockerMock.createImage, 2);
-                assert.calledWith(dockerMock.createContainer, buildArgs);
-                assert.calledWith(dockerMock.createContainer, launcherArgs);
-                assert.callCount(dockerMock.createContainer, 2);
-                assert.callCount(buildContainer.start, 1);
-            });
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.createImage, buildImageArgs);
+                    assert.calledWith(dockerMock.createImage, launcherImageArgs);
+                    assert.callCount(dockerMock.createImage, 2);
+                    assert.calledWith(dockerMock.createContainer, buildArgs);
+                    assert.calledWith(dockerMock.createContainer, launcherArgs);
+                    assert.callCount(dockerMock.createContainer, 2);
+                    assert.callCount(buildContainer.start, 1);
+                });
         });
 
         it('bubbles create problems back', () => {
             dockerMock.createContainer.yieldsAsync(new Error('Unable to create container'));
 
-            return executor.start({
-                buildId, container, apiUri, token
-            }).then(() => {
-                throw new Error('should not have gotten here');
-            }).catch((error) => {
-                assert.equal(error.message, 'Unable to create container');
-            });
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token
+                })
+                .then(() => {
+                    throw new Error('should not have gotten here');
+                })
+                .catch(error => {
+                    assert.equal(error.message, 'Unable to create container');
+                });
         });
 
         it('bubbles start problems back', () => {
             containerMock.start.yieldsAsync(new Error('Unable to start container'));
 
-            return executor.start({
-                buildId, container, apiUri, token
-            }).then(() => {
-                throw new Error('should not have gotten here');
-            }).catch((error) => {
-                assert.equal(error.message, 'Unable to start container');
-            });
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token
+                })
+                .then(() => {
+                    throw new Error('should not have gotten here');
+                })
+                .catch(error => {
+                    assert.equal(error.message, 'Unable to start container');
+                });
         });
     });
 
@@ -422,16 +415,17 @@ describe('index', function () {
             };
 
             dockerMock.listContainers.yieldsAsync(new Error('bad container args'));
-            dockerMock.listContainers.withArgs(findArgs)
-                .yieldsAsync(null, [containerShellMock, containerShellMock]);
+            dockerMock.listContainers.withArgs(findArgs).yieldsAsync(null, [containerShellMock, containerShellMock]);
 
-            return executor.stop({
-                buildId
-            }).then(() => {
-                assert.calledWith(dockerMock.listContainers, findArgs);
-                assert.calledWith(containerMock.remove, removeArgs);
-                assert.callCount(containerMock.remove, 2);
-            });
+            return executor
+                .stop({
+                    buildId
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.listContainers, findArgs);
+                    assert.calledWith(containerMock.remove, removeArgs);
+                    assert.callCount(containerMock.remove, 2);
+                });
         });
 
         it('supports prefixes', () => {
@@ -446,8 +440,7 @@ describe('index', function () {
             };
 
             dockerMock.listContainers.yieldsAsync(new Error('bad container args'));
-            dockerMock.listContainers.withArgs(findArgs)
-                .yieldsAsync(null, [containerShellMock, containerShellMock]);
+            dockerMock.listContainers.withArgs(findArgs).yieldsAsync(null, [containerShellMock, containerShellMock]);
 
             executor = new Executor({
                 prefix,
@@ -458,71 +451,80 @@ describe('index', function () {
                 }
             });
 
-            return executor.stop({
-                buildId
-            }).then(() => {
-                assert.calledWith(dockerMock.listContainers, findArgs);
-                assert.calledWith(containerMock.remove, removeArgs);
-                assert.callCount(containerMock.remove, 2);
-            });
+            return executor
+                .stop({
+                    buildId
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.listContainers, findArgs);
+                    assert.calledWith(containerMock.remove, removeArgs);
+                    assert.callCount(containerMock.remove, 2);
+                });
         });
 
         it('bubbles list problems back', () => {
             dockerMock.listContainers.yieldsAsync(new Error('Unable to list containers'));
 
-            return executor.stop({
-                buildId
-            }).then(() => {
-                throw new Error('should not have gotten here');
-            }).catch((error) => {
-                assert.equal(error.message, 'Unable to list containers');
-            });
+            return executor
+                .stop({
+                    buildId
+                })
+                .then(() => {
+                    throw new Error('should not have gotten here');
+                })
+                .catch(error => {
+                    assert.equal(error.message, 'Unable to list containers');
+                });
         });
 
         it('bubbles remove problems back', () => {
             containerMock.remove.yieldsAsync(new Error('Unable to remove container'));
 
-            return executor.stop({
-                buildId
-            }).then(() => {
-                throw new Error('should not have gotten here');
-            }).catch((error) => {
-                assert.equal(error.message, 'Unable to remove container');
-            });
+            return executor
+                .stop({
+                    buildId
+                })
+                .then(() => {
+                    throw new Error('should not have gotten here');
+                })
+                .catch(error => {
+                    assert.equal(error.message, 'Unable to remove container');
+                });
         });
     });
 
     describe('stats', () => {
         it('bubbles stats from circuit fuses', () => {
-            assert.deepEqual({
-                requests: {
-                    total: 0,
-                    timeouts: 0,
-                    success: 0,
-                    failure: 0,
-                    concurrent: 0,
-                    averageTime: 0
+            assert.deepEqual(
+                {
+                    requests: {
+                        total: 0,
+                        timeouts: 0,
+                        success: 0,
+                        failure: 0,
+                        concurrent: 0,
+                        averageTime: 0
+                    },
+                    breaker: {
+                        isClosed: true
+                    }
                 },
-                breaker: {
-                    isClosed: true
-                }
-            }, executor.stats());
+                executor.stats()
+            );
         });
     });
 
     describe('periodic', () => {
-        it('resolves to null when calling periodic start',
-            () => executor.startPeriodic().then(res => assert.isNull(res)));
+        it('resolves to null when calling periodic start', () =>
+            executor.startPeriodic().then(res => assert.isNull(res)));
 
-        it('resolves to null when calling periodic stop',
-            () => executor.stopPeriodic().then(res => assert.isNull(res)));
+        it('resolves to null when calling periodic stop', () =>
+            executor.stopPeriodic().then(res => assert.isNull(res)));
     });
 
     describe('frozen', () => {
-        it('resolves to null when calling frozen start',
-            () => executor.startFrozen().then(res => assert.isNull(res)));
+        it('resolves to null when calling frozen start', () => executor.startFrozen().then(res => assert.isNull(res)));
 
-        it('resolves to null when calling frozen stop',
-            () => executor.stopFrozen().then(res => assert.isNull(res)));
+        it('resolves to null when calling frozen stop', () => executor.stopFrozen().then(res => assert.isNull(res)));
     });
 });
