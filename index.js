@@ -13,24 +13,25 @@ class DockerExecutor extends Executor {
     /**
      * Constructor
      * @method constructor
-     * @param  {Object} options                                  Configuration options
-     * @param  {Object} options.ecosystem                        Screwdriver Ecosystem
-     * @param  {Object} options.ecosystem.api                    Routable URI to Screwdriver API
-     * @param  {Object} options.ecosystem.store                  Routable URI to Screwdriver Store
-     * @param  {Object} options.ecosystem.ui                     Routable URI to Screwdriver UI
-     * @param  {Object} [options.docker]                         Docker configuration
-     * @param  {String} [options.docker.protocol]                Protocol to use
-     * @param  {String} [options.docker.host]                    Docker Swarm host to interact with
-     * @param  {String} [options.docker.port]                    Port number
-     * @param  {String} [options.docker.socketPath]              Docker socket to use
-     * @param  {String} [options.docker.ca]                      Certificate authority
-     * @param  {String} [options.docker.cert]                    Certificate to use
-     * @param  {String} [options.docker.key]                     Key for the certificate
-     * @param  {Object} [options.fusebox]                        Fusebox configuration
-     * @param  {Object} [options.fusebox.breaker]                Breaker configuration
-     * @param  {Number} [options.fusebox.breaker.timeout=300000] Timeout before retrying
-     * @param  {String} [options.launchVersion=stable]           Launcher container version to use
-     * @param  {String} [options.prefix=""]                      Prefix to all container names
+     * @param  {Object} options                                      Configuration options
+     * @param  {Object} options.ecosystem                            Screwdriver Ecosystem
+     * @param  {Object} options.ecosystem.api                        Routable URI to Screwdriver API
+     * @param  {Object} options.ecosystem.store                      Routable URI to Screwdriver Store
+     * @param  {Object} options.ecosystem.ui                         Routable URI to Screwdriver UI
+     * @param  {Object} [options.docker]                             Docker configuration
+     * @param  {String} [options.docker.protocol]                    Protocol to use
+     * @param  {String} [options.docker.host]                        Docker Swarm host to interact with
+     * @param  {String} [options.docker.port]                        Port number
+     * @param  {String} [options.docker.socketPath]                  Docker socket to use
+     * @param  {String} [options.docker.ca]                          Certificate authority
+     * @param  {String} [options.docker.cert]                        Certificate to use
+     * @param  {String} [options.docker.key]                         Key for the certificate
+     * @param  {Object} [options.fusebox]                            Fusebox configuration
+     * @param  {Object} [options.fusebox.breaker]                    Breaker configuration
+     * @param  {Number} [options.fusebox.breaker.timeout=300000]     Timeout before retrying
+     * @param  {String} [options.launchImage=screwdrivercd/launcher] Launcher container version to use
+     * @param  {String} [options.launchVersion=stable]               Launcher container version to use
+     * @param  {String} [options.prefix=""]                          Prefix to all container names
      */
     constructor(options) {
         super();
@@ -38,6 +39,7 @@ class DockerExecutor extends Executor {
         this.ecosystem = options.ecosystem;
         this.docker = new Docker(options.docker);
         this.launchVersion = options.launchVersion || 'stable';
+        this.launchImage = options.launchImage || 'screwdrivercd/launcher';
         this.prefix = options.prefix || '';
 
         const breakerOptions = hoek.applyToDefaults(
@@ -162,7 +164,7 @@ class DockerExecutor extends Executor {
 
         return Promise.all([
             this._createImage({
-                fromImage: 'screwdrivercd/launcher',
+                fromImage: this.launchImage,
                 tag: this.launchVersion
             }),
             this._createImage({
@@ -173,7 +175,7 @@ class DockerExecutor extends Executor {
             .then(() =>
                 this._createContainer({
                     name: `${this.prefix}${config.buildId}-init`,
-                    Image: `screwdrivercd/launcher:${this.launchVersion}`,
+                    Image: `${this.launchImage}:${this.launchVersion}`,
                     Entrypoint: '/bin/true',
                     Labels: {
                         sdbuild: `${this.prefix}${config.buildId}`
