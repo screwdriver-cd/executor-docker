@@ -1,12 +1,12 @@
 'use strict';
 
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const sinon = require('sinon');
 const mockery = require('mockery');
 
 sinon.assert.expose(assert, { prefix: '' });
 
-describe('index', function() {
+describe('index', function () {
     // Time not important. Only life important.
     this.timeout(5000);
 
@@ -403,6 +403,7 @@ describe('index', function() {
 
     describe('stop', () => {
         const buildId = 1992;
+        const apiUri = 'https://api.sd.cd';
 
         it('finds and removes the containers', () => {
             const findArgs = {
@@ -419,6 +420,7 @@ describe('index', function() {
 
             return executor
                 .stop({
+                    apiUri,
                     buildId
                 })
                 .then(() => {
@@ -453,6 +455,7 @@ describe('index', function() {
 
             return executor
                 .stop({
+                    apiUri,
                     buildId
                 })
                 .then(() => {
@@ -467,6 +470,7 @@ describe('index', function() {
 
             return executor
                 .stop({
+                    apiUri,
                     buildId
                 })
                 .then(() => {
@@ -482,6 +486,7 @@ describe('index', function() {
 
             return executor
                 .stop({
+                    apiUri,
                     buildId
                 })
                 .then(() => {

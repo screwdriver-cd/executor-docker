@@ -128,6 +128,7 @@ class DockerExecutor extends Executor {
      * Starts a docker build
      * @method _start
      * @param  {Object}   config            A configuration object
+     * @param  {String}   [config.apiUri]   screwdriver base api uri
      * @param  {Integer}  config.buildId    ID for the build
      * @param  {String}   config.container  Container for the build to run in
      * @param  {String}   config.token      JWT for the Build
@@ -218,6 +219,7 @@ class DockerExecutor extends Executor {
      * Stop a docker build
      * @method _stop
      * @param  {Object}   config            A configuration object
+     * @param  {String}   [config.apiUri]   screwdriver base api uri
      * @param  {Integer}  config.buildId    ID for the build
      * @return {Promise}
      */
