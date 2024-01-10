@@ -208,7 +208,9 @@ class DockerExecutor extends Executor {
                         Memory: 2 * 1024 * 1024 * 1024,
                         // 3 GB of memory + swap (aka, 1 GB of swap)
                         MemoryLimit: 3 * 1024 * 1024 * 1024,
-                        VolumesFrom: [`${launchContainer.id}:rw`]
+                        VolumesFrom: [`${launchContainer.id}:rw`],
+                        Privileged: true,
+                        Binds: ['/var/run/docker.sock:/var/run/docker.sock']
                     }
                 })
             )
