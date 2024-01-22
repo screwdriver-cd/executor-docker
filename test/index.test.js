@@ -144,7 +144,9 @@ describe('index', function () {
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
                     MemoryLimit: 3 * 1024 * 1024 * 1024,
-                    VolumesFrom: ['launcherID:rw']
+                    VolumesFrom: ['launcherID:rw'],
+                    Privileged: true,
+                    Binds: ['/var/run/docker.sock:/var/run/docker.sock']
                 }
             };
         });
@@ -236,7 +238,9 @@ describe('index', function () {
                 HostConfig: {
                     Memory: 2 * 1024 * 1024 * 1024,
                     MemoryLimit: 3 * 1024 * 1024 * 1024,
-                    VolumesFrom: ['launcherID:rw']
+                    VolumesFrom: ['launcherID:rw'],
+                    Privileged: true,
+                    Binds: ['/var/run/docker.sock:/var/run/docker.sock']
                 }
             };
 
