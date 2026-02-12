@@ -123,7 +123,7 @@ describe('index', function () {
             launcherArgs = {
                 name: `${buildId}-init`,
                 Image: 'screwdrivercd/launcher:stable',
-                Entrypoint: '/bin/true',
+                Entrypoint: ['/bin/true'],
                 Labels: {
                     sdbuild: buildId.toString()
                 }
@@ -136,7 +136,7 @@ describe('index', function () {
             buildArgs = {
                 name: `${buildId}-build`,
                 Image: container,
-                Entrypoint: '/opt/sd/launcher_entrypoint.sh',
+                Entrypoint: ['/opt/sd/launcher_entrypoint.sh'],
                 Labels: {
                     sdbuild: buildId.toString()
                 },
@@ -222,7 +222,7 @@ describe('index', function () {
             launcherArgs = {
                 name: `${prefix}${buildId}-init`,
                 Image: 'screwdrivercd/launcher:stable',
-                Entrypoint: '/bin/true',
+                Entrypoint: ['/bin/true'],
                 Labels: {
                     sdbuild: `${prefix}${buildId}`
                 }
@@ -230,7 +230,7 @@ describe('index', function () {
             buildArgs = {
                 name: `${prefix}${buildId}-build`,
                 Image: container,
-                Entrypoint: '/opt/sd/launcher_entrypoint.sh',
+                Entrypoint: ['/opt/sd/launcher_entrypoint.sh'],
                 Labels: {
                     sdbuild: `${prefix}${buildId}`
                 },

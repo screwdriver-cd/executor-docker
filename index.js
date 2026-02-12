@@ -177,7 +177,7 @@ class DockerExecutor extends Executor {
                 this._createContainer({
                     name: `${this.prefix}${config.buildId}-init`,
                     Image: `${this.launchImage}:${this.launchVersion}`,
-                    Entrypoint: '/bin/true',
+                    Entrypoint: ['/bin/true'],
                     Labels: {
                         sdbuild: `${this.prefix}${config.buildId}`
                     }
@@ -187,7 +187,7 @@ class DockerExecutor extends Executor {
                 this._createContainer({
                     name: `${this.prefix}${config.buildId}-build`,
                     Image: config.container,
-                    Entrypoint: '/opt/sd/launcher_entrypoint.sh',
+                    Entrypoint: ['/opt/sd/launcher_entrypoint.sh'],
                     Labels: {
                         sdbuild: `${this.prefix}${config.buildId}`
                     },
