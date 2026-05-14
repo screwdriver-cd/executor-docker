@@ -46,7 +46,7 @@
     "@hapi/hoek": "^11.0.7",
     "circuit-fuses": "^6.0.0",
     "docker-parse-image": "^3.0.1",
-    "dockerode": "^4.0.0",
+    "dockerode": "^5.0.0",
     "screwdriver-executor-base": "^11.0.0"
   }
 }
