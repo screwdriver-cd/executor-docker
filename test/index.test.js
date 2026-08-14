@@ -145,8 +145,8 @@ describe('index', function () {
                     Memory: 2 * 1024 * 1024 * 1024,
                     MemoryLimit: 3 * 1024 * 1024 * 1024,
                     VolumesFrom: ['launcherID:rw'],
-                    Privileged: true,
-                    Binds: ['/var/run/docker.sock:/var/run/docker.sock']
+                    Privileged: false,
+                    Binds: []
                 }
             };
         });
@@ -212,6 +212,73 @@ describe('index', function () {
                 });
         });
 
+        it('defaults to Privileged: false and no docker socket bind', () => {
+            dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
+
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token
+                })
+                .then(() => {
+                    const containerArgs = dockerMock.createContainer.secondCall.args[0];
+
+                    assert.isFalse(containerArgs.HostConfig.Privileged);
+                    assert.deepEqual(containerArgs.HostConfig.Binds, []);
+                });
+        });
+
+        it('enables Privileged mode and the docker socket bind when screwdriver.cd/dockerEnabled is set', () => {
+            buildArgs.HostConfig.Privileged = true;
+            buildArgs.HostConfig.Binds = ['/var/run/docker.sock:/var/run/docker.sock'];
+
+            dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
+
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token,
+                    annotations: {
+                        'screwdriver.cd/dockerEnabled': true
+                    }
+                })
+                .then(() => {
+                    assert.calledWith(dockerMock.createContainer, buildArgs);
+                    assert.callCount(buildContainer.start, 1);
+                });
+        });
+
+        it('keeps Privileged: false and no docker socket bind when screwdriver.cd/dockerEnabled is the string "false"', () => {
+            dockerMock.createContainer.yieldsAsync(new Error('bad container args'));
+            dockerMock.createContainer.withArgs(launcherArgs).yieldsAsync(null, launcherContainer);
+            dockerMock.createContainer.withArgs(buildArgs).yieldsAsync(null, buildContainer);
+
+            return executor
+                .start({
+                    buildId,
+                    container,
+                    apiUri,
+                    token,
+                    annotations: {
+                        'screwdriver.cd/dockerEnabled': 'false'
+                    }
+                })
+                .then(() => {
+                    const containerArgs = dockerMock.createContainer.secondCall.args[0];
+
+                    assert.isFalse(containerArgs.HostConfig.Privileged);
+                    assert.deepEqual(containerArgs.HostConfig.Binds, []);
+                });
+        });
+
         it('supports prefixed containers', () => {
             const prefix = 'beta_';
             const buildImageArgs = {
@@ -239,8 +306,8 @@ describe('index', function () {
                     Memory: 2 * 1024 * 1024 * 1024,
                     MemoryLimit: 3 * 1024 * 1024 * 1024,
                     VolumesFrom: ['launcherID:rw'],
-                    Privileged: true,
-                    Binds: ['/var/run/docker.sock:/var/run/docker.sock']
+                    Privileged: false,
+                    Binds: []
                 }
             };
 

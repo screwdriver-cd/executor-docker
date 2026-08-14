@@ -36,6 +36,12 @@ const executor = new DockerExecutor({
 
 For more information on `start`, `stop`, and `stats` please see the [executor-base].
 
+### Job annotations
+
+| Annotation | Type | Description |
+| :--------- | :--- | :----------- |
+| `screwdriver.cd/dockerEnabled` | Boolean | Opts the build container into `Privileged` mode with the host's Docker socket (`/var/run/docker.sock`) bind-mounted in. Off by default — only enable this for jobs that specifically need to build or run Docker containers, since it grants the build full host-level access. |
+
 ## Testing
 
 ```bash

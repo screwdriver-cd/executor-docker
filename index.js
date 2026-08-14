@@ -132,6 +132,9 @@ class DockerExecutor extends Executor {
      * @param  {Integer}  config.buildId    ID for the build
      * @param  {String}   config.container  Container for the build to run in
      * @param  {String}   config.token      JWT for the Build
+     * @param  {Object}   [config.annotations] Job annotations. `screwdriver.cd/dockerEnabled` opts
+     *                                     the build container into `Privileged` mode with the host's
+     *                                     Docker socket mounted in; both are off by default.
      * @return {Promise}
      */
 
@@ -141,6 +144,8 @@ class DockerExecutor extends Executor {
         let buildImage = piecesParts.name;
         const buildTimeout = hoek.reach(config, 'annotations>screwdriver.cd/timeout', { separator: '>' });
         const timeout = parseInt(buildTimeout || DEFAULT_BUILD_TIMEOUT, 10);
+        const dockerEnabled =
+            hoek.reach(config, 'annotations>screwdriver.cd/dockerEnabled', { separator: '>' }) === true;
 
         /**
          *
@@ -209,8 +214,8 @@ class DockerExecutor extends Executor {
                         // 3 GB of memory + swap (aka, 1 GB of swap)
                         MemoryLimit: 3 * 1024 * 1024 * 1024,
                         VolumesFrom: [`${launchContainer.id}:rw`],
-                        Privileged: true,
-                        Binds: ['/var/run/docker.sock:/var/run/docker.sock']
+                        Privileged: dockerEnabled,
+                        Binds: dockerEnabled ? ['/var/run/docker.sock:/var/run/docker.sock'] : []
                     }
                 })
             )
